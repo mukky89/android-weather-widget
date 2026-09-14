@@ -50,26 +50,32 @@
 </LinearLayout>
 </LinearLayout>
 <LinearLayout android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="4dp" android:background="@drawable/day_card" android:paddingStart="8dp" android:orientation="horizontal" android:gravity="center_vertical">
+<LinearLayout android:id="@+id/google_event_area" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center_vertical" android:background="?android:attr/selectableItemBackground">
 <ImageView android:importantForAccessibility="no" android:layout_width="3dp" android:layout_height="24dp" android:background="#A7C7FF" android:layout_marginEnd="7dp"/>
 <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
-<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
-<TextView android:id="@+id/google_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="GOOGLE · GMAIL" android:textSize="8sp" android:textColor="#A7C7FF" android:includeFontPadding="false"/>
-<TextView android:id="@+id/google_time" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="end" android:text="Najbližšia udalosť" android:textSize="9sp" android:textColor="#CCFFFFFF" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false" android:layout_marginStart="6dp"/>
-</LinearLayout>
+<TextView android:id="@+id/google_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="GOOGLE · GMAIL" android:textSize="8sp" android:textColor="#A7C7FF" android:includeFontPadding="false" android:maxLines="1"/>
 <TextView android:id="@+id/google_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Pripojiť kalendár" android:textSize="12sp" android:textColor="#FFFFFF" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false" android:layout_marginTop="2dp"/>
+</LinearLayout></LinearLayout>
+<ImageView android:importantForAccessibility="no" android:layout_width="1dp" android:layout_height="24dp" android:layout_marginStart="4dp" android:background="#427B95B4"/>
+<LinearLayout android:id="@+id/google_day_area" android:layout_width="88dp" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center" android:paddingStart="3dp" android:paddingEnd="3dp" android:background="?android:attr/selectableItemBackground">
+<TextView android:id="@+id/google_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Dnes" android:textSize="9sp" android:textColor="#DCE6F4" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+<TextView android:id="@+id/google_day_hint" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Celý deň ›" android:textSize="9sp" android:textColor="#A7C7FF" android:maxLines="1" android:includeFontPadding="false" android:layout_marginTop="2dp"/>
 </LinearLayout>
-<TextView android:id="@+id/google_add" android:layout_width="40dp" android:layout_height="match_parent" android:minHeight="40dp" android:layout_marginStart="4dp" android:gravity="center" android:text="+" android:textSize="25sp" android:fontFamily="sans-serif-light" android:textColor="#FFFFFF" android:contentDescription="Pridať udalosť do Google" android:background="?android:attr/selectableItemBackground"/>
+<TextView android:id="@+id/google_add" android:layout_width="36dp" android:layout_height="match_parent" android:gravity="center" android:text="+" android:textSize="25sp" android:fontFamily="sans-serif-light" android:textColor="#FFFFFF" android:contentDescription="Pridať udalosť do Google" android:background="?android:attr/selectableItemBackground"/>
 </LinearLayout>
 <LinearLayout android:layout_width="match_parent" android:layout_height="40dp" android:layout_marginTop="4dp" android:background="@drawable/day_card" android:paddingStart="8dp" android:orientation="horizontal" android:gravity="center_vertical">
+<LinearLayout android:id="@+id/outlook_event_area" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center_vertical" android:background="?android:attr/selectableItemBackground">
 <ImageView android:importantForAccessibility="no" android:layout_width="3dp" android:layout_height="24dp" android:background="#88D5F7" android:layout_marginEnd="7dp"/>
 <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
-<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical">
-<TextView android:id="@+id/outlook_label" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="OUTLOOK" android:textSize="8sp" android:textColor="#88D5F7" android:includeFontPadding="false"/>
-<TextView android:id="@+id/outlook_time" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:gravity="end" android:text="Najbližšia udalosť" android:textSize="9sp" android:textColor="#CCFFFFFF" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false" android:layout_marginStart="6dp"/>
-</LinearLayout>
+<TextView android:id="@+id/outlook_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="OUTLOOK" android:textSize="8sp" android:textColor="#88D5F7" android:includeFontPadding="false" android:maxLines="1"/>
 <TextView android:id="@+id/outlook_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Pripojiť kalendár" android:textSize="12sp" android:textColor="#FFFFFF" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false" android:layout_marginTop="2dp"/>
+</LinearLayout></LinearLayout>
+<ImageView android:importantForAccessibility="no" android:layout_width="1dp" android:layout_height="24dp" android:layout_marginStart="4dp" android:background="#427B95B4"/>
+<LinearLayout android:id="@+id/outlook_day_area" android:layout_width="88dp" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center" android:paddingStart="3dp" android:paddingEnd="3dp" android:background="?android:attr/selectableItemBackground">
+<TextView android:id="@+id/outlook_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Dnes" android:textSize="9sp" android:textColor="#DCE6F4" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
+<TextView android:id="@+id/outlook_day_hint" android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center" android:text="Celý deň ›" android:textSize="9sp" android:textColor="#88D5F7" android:maxLines="1" android:includeFontPadding="false" android:layout_marginTop="2dp"/>
 </LinearLayout>
-<TextView android:id="@+id/outlook_add" android:layout_width="40dp" android:layout_height="match_parent" android:minHeight="40dp" android:layout_marginStart="4dp" android:gravity="center" android:text="+" android:textSize="25sp" android:fontFamily="sans-serif-light" android:textColor="#FFFFFF" android:contentDescription="Pridať udalosť do Outlook" android:background="?android:attr/selectableItemBackground"/>
+<TextView android:id="@+id/outlook_add" android:layout_width="36dp" android:layout_height="match_parent" android:gravity="center" android:text="+" android:textSize="25sp" android:fontFamily="sans-serif-light" android:textColor="#FFFFFF" android:contentDescription="Pridať udalosť do Outlook" android:background="?android:attr/selectableItemBackground"/>
 </LinearLayout>
 <LinearLayout android:layout_width="match_parent" android:layout_height="24dp" android:gravity="center_vertical">
 <TextView android:id="@+id/day_weather_time" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="Open-Meteo" android:textSize="9sp" android:textColor="#ADBED5" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>

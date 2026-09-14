@@ -115,6 +115,10 @@ class DayWidget : AppWidgetProvider() {
             val hidden = context.getSharedPreferences("day", Context.MODE_PRIVATE).getStringSet("hidden_calendars", emptySet()).orEmpty()
             val rows = listOf(Triple(CalendarSource.GOOGLE, R.id.google_title, R.id.google_time), Triple(CalendarSource.OUTLOOK, R.id.outlook_title, R.id.outlook_time))
             for ((source, title, time) in rows) {
+                val leftId = if (source == CalendarSource.GOOGLE) R.id.google_event_area else R.id.outlook_event_area
+                val rightId = if (source == CalendarSource.GOOGLE) R.id.google_day_area else R.id.outlook_day_area
+                val labelId = if (source == CalendarSource.GOOGLE) R.id.google_label else R.id.outlook_label
+                val hintId = if (source == CalendarSource.GOOGLE) R.id.google_day_hint else R.id.outlook_day_hint
                 val addId = if (source == CalendarSource.GOOGLE) R.id.google_add else R.id.outlook_add
                 setOnClickPendingIntent(addId, PendingIntent.getActivity(context, 100 + source.ordinal,
                     Intent(context, NewEventActivity::class.java).putExtra("source", source.name),
@@ -122,9 +126,12 @@ class DayWidget : AppWidgetProvider() {
                 val event = state.agenda.events.firstOrNull { it.source == source }
                 val available = state.agenda.calendars.any { it.source == source && it.id.toString() !in hidden }
                 setTextViewText(title, state.agenda.error ?: event?.title ?: if (available) "Bez udalostí · 14 dní" else "Pripojiť kalendár")
-                setTextViewText(time, event?.let { eventTime(it) } ?: if (available) "" else "Nastavenia")
-                val target = if (event == null) open else PendingIntent.getActivity(context, source.ordinal + 1,
+                setTextViewText(time, event?.let { eventTime(it) } ?: "Dnes")
+                val dayTarget = PendingIntent.getActivity(context, 300 + source.ordinal, calendarDayIntent(context, event),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                val target = if (event == null) { if (available) dayTarget else open } else PendingIntent.getActivity(context, source.ordinal + 1,
                     Intent(Intent.ACTION_VIEW, ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.id))
+                        .setIdentifier("${event.id}:${event.begin}")
                         .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.begin).putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.end)
                         .also { intent ->
                             // Google Calendar opens Android provider IDs, including exported Outlook events.
@@ -132,7 +139,10 @@ class DayWidget : AppWidgetProvider() {
                             if (google.resolveActivity(context.packageManager) != null) intent.setPackage("com.google.android.calendar")
                         },
                     PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                setOnClickPendingIntent(title, target); setOnClickPendingIntent(time, target)
+                for (id in listOf(leftId, labelId, title)) setOnClickPendingIntent(id, target)
+                for (id in listOf(rightId, time, hintId)) setOnClickPendingIntent(id, dayTarget)
+                setContentDescription(leftId, event?.let { "Otvoriť udalosť: ${it.title}" } ?: if (available) "Otvoriť dnešný deň" else "Pripojiť kalendár")
+                setContentDescription(rightId, "Otvoriť celý deň ${calendarDate(event).format(DateTimeFormatter.ofPattern("d. M. yyyy"))}")
             }
         }
     }

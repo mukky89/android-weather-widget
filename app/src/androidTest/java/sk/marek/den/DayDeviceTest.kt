@@ -35,11 +35,18 @@ class DayDeviceTest {
                 val w = (width*d).toInt(); val h = (height*d).toInt()
                 view.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
                 view.layout(0, 0, w, h)
-                for (id in listOf(R.id.day_alarm, R.id.day_panel, R.id.forecast_temp_0, R.id.forecast_temp_5, R.id.outlook_title, R.id.outlook_add, R.id.day_weather_time)) {
+                for (id in listOf(R.id.day_alarm, R.id.day_panel, R.id.forecast_temp_0, R.id.forecast_temp_5, R.id.outlook_title, R.id.outlook_add, R.id.google_day_area, R.id.outlook_day_area, R.id.day_weather_time)) {
                     val child = view.findViewById<View>(id)
                     val rect = android.graphics.Rect(); child.getDrawingRect(rect)
                     (view as android.view.ViewGroup).offsetDescendantRectToMyCoords(child, rect)
                     assertTrue("Clipped view $id: $rect / $h", rect.bottom <= h && rect.right <= w && rect.top >= 0 && rect.left >= 0)
+                }
+                for ((leftId, rightId, addId) in listOf(Triple(R.id.google_event_area, R.id.google_day_area, R.id.google_add), Triple(R.id.outlook_event_area, R.id.outlook_day_area, R.id.outlook_add))) {
+                    val left = view.findViewById<View>(leftId)
+                    val right = view.findViewById<View>(rightId)
+                    val add = view.findViewById<View>(addId)
+                    assertTrue("Event/day/add targets must remain separate", left.width > 0 && left.right <= right.left && right.right <= add.left)
+                    assertTrue(left.hasOnClickListeners() && right.hasOnClickListeners() && add.hasOnClickListeners())
                 }
                 assertEquals("HH:mm", view.findViewById<TextClock>(R.id.day_clock).format24Hour.toString())
                 val b = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888); view.draw(Canvas(b))

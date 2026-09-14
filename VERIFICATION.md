@@ -1,5 +1,15 @@
 # Overenie
 
+## 0.9.0 — samostatné otvorenie udalosti a dňa
+
+- Ľavá časť Google aj Outlook riadku otvára detail zobrazenej udalosti. Pravá časť má oddelenú plochu s časom a označením „Celý deň ›“; otvára dátum udalosti cez Calendar Provider time URI s `VIEW=DAY`. Tlačidlo + zostáva samostatné.
+- Bez udalosti je cieľom dnešný deň. Dátum celodennej udalosti sa číta v UTC, časovanej udalosti v miestnom pásme. Identita odkazu na detail rozlišuje začiatok opakovanej udalosti.
+- Zostavenie, všetkých 22 unit testov a lint prešli. Dva nové testy pokrývajú miestny dátum, UTC celodenné udalosti a dnešok bez udalosti.
+- Verzia 0.9.0/code 9 nainštalovaná ako aktualizácia na Xiaomi 13 Lite. Render test na telefóne prešiel pri 250 × 290 dp aj 350 × 290 dp vrátane oddelenia oblastí udalosť/deň/+.
+- Skutočné kliknutia overili detail Google aj Outlook udalosti, dnešný aj nasledujúci deň v jednodennom zobrazení Google Calendar a otvorenie formulára cez +. Žiadna udalosť sa pri teste neukladala.
+- Denné zobrazenie rešpektuje viditeľnosť kalendárov v Google Calendar; samotné otvorenie dňa nezapína skryté kalendáre. Náhradná kalendárová aplikácia pri chýbajúcom Google Calendar nebola testovaná.
+- Formát časového odkazu je popísaný v [Android Calendar Provider](https://developer.android.com/identity/providers/calendar-provider).
+
 ## Funkčný základ 0.7.0
 
 Pred oddelením bol rovnaký zdroj aplikácie overený na Xiaomi 13 Lite s Androidom 15:
