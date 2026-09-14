@@ -1,0 +1,3 @@
+https://github.com/peterknezek/name-day-calendar
+Source: data/countries/SK.yaml
+MIT license; Unicode normalized to NFC.

@@ -1,0 +1,8 @@
+<resources>
+    <style name="Theme.Day" parent="android:style/Theme.Material.Light.NoActionBar">
+        <item name="android:fontFamily">sans</item><item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowBackground">#F3F5FA</item><item name="android:colorAccent">#315E9E</item>
+    </style>
+    <string name="widget_name">Deň · všetko podstatné</string>
+    <string name="widget_description">Kompaktné karty: čas, budík, dátum, meniny, počasie podľa GPS, predpoveď na 6 dní a kalendáre s tlačidlami +.</string>
+</resources>
