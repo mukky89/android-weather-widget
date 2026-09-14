@@ -46,6 +46,7 @@ class DayActivity : ComponentActivity() {
                 item { ReminderSettings(this@DayActivity, state) }
                 item { Card(shape = RoundedCornerShape(20.dp)) { Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
                     Text("Počasie podľa polohy", fontWeight = FontWeight.Bold)
+                    Text("Ťuknutie na počasie alebo predpoveď vo widgete otvorí Windy.com pre zobrazené miesto. Zaokrúhlená poloha sa odošle Windy až pri otvorení odkazu.", fontSize = 12.sp)
                     Text("Poloha sa zaokrúhli približne na 1 km a odošle Open-Meteo pre počasie a systémovej službe pre názov mesta. Kalendáre zostávajú v mobile. História polohy sa neukladá.", fontSize = 13.sp)
                     Text(state.weather?.let { "${it.city} · ${it.temperature} °C · ${weatherText(it.code)}" } ?: state.weatherError ?: "Poloha zatiaľ nie je nastavená")
                     Button(onClick = {
@@ -78,7 +79,7 @@ class DayActivity : ComponentActivity() {
                 item { OutlinedButton(onClick = { app.scope.launch { app.refresh(true) } }, enabled = !state.loading, modifier = Modifier.fillMaxWidth()) { Text(if (state.loading) "Načítavam…" else "Obnoviť widget a udalosti") } }
                 item { Text("Meniny dnes: ${nameday(this@DayActivity)}", fontWeight = FontWeight.SemiBold)
                     Text("Počasie: Open-Meteo (CC BY 4.0). Meniny: name-day-calendar / Peter Knežek (MIT). Widget zobrazuje najbližšiu udalosť z každej skupiny v nasledujúcich 14 dňoch. Čas sa mení priamo na ploche.", fontSize = 11.sp)
-                    Text("Deň 0.7 · vytvorené pre Mareka", fontSize = 11.sp, modifier = Modifier.padding(top = 12.dp)) }
+                    Text("Deň 0.8 · vytvorené pre Mareka", fontSize = 11.sp, modifier = Modifier.padding(top = 12.dp)) }
             }
         }
     }

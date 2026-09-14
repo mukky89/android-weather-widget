@@ -5,7 +5,7 @@
 <TextClock android:id="@+id/day_clock" android:layout_width="match_parent" android:layout_height="52dp" android:format12Hour="HH:mm" android:format24Hour="HH:mm" android:textSize="56sp" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="28sp" android:autoSizeMaxTextSize="60sp" android:autoSizeStepGranularity="2sp" android:fontFamily="sans-serif-light" android:gravity="center_vertical" android:textColor="#FFFFFF" android:includeFontPadding="false" android:maxLines="1" android:contentDescription="Hodiny · otvoriť budíky"/>
 <TextClock android:id="@+id/day_date" android:layout_width="match_parent" android:layout_height="20dp" android:format12Hour="EEE, d. M. yyyy" android:format24Hour="EEE, d. M. yyyy" android:textSize="12sp" android:textColor="#DCE6F4" android:maxLines="1" android:includeFontPadding="false"/>
 </LinearLayout>
-<LinearLayout android:layout_width="112dp" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center_vertical">
+<LinearLayout android:id="@+id/day_weather_card" android:layout_width="112dp" android:layout_height="match_parent" android:orientation="vertical" android:gravity="center_vertical">
 <TextView android:id="@+id/day_city" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Počasie podľa GPS" android:textSize="11sp" android:gravity="end" android:textColor="#FFFFFF" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false"/>
 <LinearLayout android:layout_width="match_parent" android:layout_height="42dp" android:gravity="center_vertical|end">
 <ImageView android:id="@+id/day_weather_icon" android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/weather_cloud" android:contentDescription="Počasie"/>

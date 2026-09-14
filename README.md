@@ -1,11 +1,12 @@
 # Deň — Android weather & calendar widget
 
-Samostatná Android aplikácia v slovenčine: hodiny, počasie podľa GPS, predpoveď na šesť dní, meniny, budík a kalendáre. Aktuálna verzia **0.7.0**, Android **11 a novší**. Balík aplikácie: `sk.marek.den`.
+Samostatná Android aplikácia v slovenčine: hodiny, počasie podľa GPS, predpoveď na šesť dní, meniny, budík a kalendáre. Aktuálna verzia **0.8.0**, Android **11 a novší**. Balík aplikácie: `sk.marek.den`.
 
 ## Funkcie
 
 - Kompaktný widget s rámčekmi, živými hodinami a dátumom.
 - Aktuálne počasie podľa polohy a šesťdňová predpoveď s denným maximom/minimom.
+- Ťuknutie na mesto, teplotu, ikonu počasia alebo pás predpovede otvorí detail miesta na Windy.com.
 - Slovenské meniny uložené offline.
 - Najbližší budík a otvorenie systémových Hodín.
 - Najbližšia udalosť z Google/Gmail a Outlook kalendárov, horizont 14 dní.
@@ -72,6 +73,7 @@ Widget má minimálny rozmer 250 × 290 dp. Skutočnú veľkosť a počet buniek
 
 - Kalendáre sa čítajú z Android Calendar Provider; zápis sa vyžiada až pri uložení novej udalosti.
 - Poloha sa pred požiadavkou zaokrúhli na dve desatinné miesta a posiela Open-Meteo a systémovému geokóderu pre názov mesta. Neukladá sa história polohy.
+- Po otvorení podrobnej predpovede sa zaokrúhlená poloha z posledného počasia odovzdá v odkaze Windy.com. Pri chýbajúcej polohe, vypnutom počasí alebo odobratom prístupe k polohe sa otvorí iba hlavná stránka Windy. Samotný widget naďalej načítava počasie z Open-Meteo.
 - Udalosti sa neposielajú na náš server; synchronizáciu vytvorených udalostí vykonáva existujúci Google/Outlook adaptér v mobile.
 - Cache obsahuje posledné počasie a polohu; pri vypnutí počasia sa odstráni. Systémové zálohovanie aplikácie je vypnuté.
 - Pripomenutia majú samostatný kanál; prehľad dňa je predvolene bez zvuku a vibrácií. Rešpektujú systémové nastavenia a režim Nerušiť.

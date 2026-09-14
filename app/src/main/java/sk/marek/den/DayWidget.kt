@@ -70,6 +70,12 @@ class DayWidget : AppWidgetProvider() {
             setTextViewText(R.id.day_names, nameday(context))
             setContentDescription(R.id.day_names, "Meniny dnes: ${nameday(context)}")
             val weather = state.weather.takeIf { context.hasLocation() }
+            val forecastTarget = PendingIntent.getActivity(context, 201, Intent(context, ForecastActivity::class.java),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            for (id in listOf(R.id.day_weather_card, R.id.day_city, R.id.day_temperature, R.id.day_weather_icon, R.id.day_weather, R.id.day_forecast)) {
+                setOnClickPendingIntent(id, forecastTarget)
+            }
+            setContentDescription(R.id.day_weather_card, "Otvoriť podrobnú predpoveď na Windy.com")
             val forecastIds = listOf(
                 intArrayOf(R.id.forecast_0, R.id.forecast_day_0, R.id.forecast_icon_0, R.id.forecast_temp_0),
                 intArrayOf(R.id.forecast_1, R.id.forecast_day_1, R.id.forecast_icon_1, R.id.forecast_temp_1),
@@ -82,12 +88,13 @@ class DayWidget : AppWidgetProvider() {
             forecastIds.forEachIndexed { index, ids ->
                 val day = forecast[index]
                 val date = today.plusDays(index.toLong())
+                setOnClickPendingIntent(ids[0], forecastTarget)
                 setTextViewText(ids[1], forecastLabel(date, today))
                 setImageViewResource(ids[2], day?.let { weatherIcon(it.code, true) } ?: R.drawable.weather_unknown)
                 setTextViewText(ids[3], day?.let { String.format(Locale.forLanguageTag("sk-SK"), "%.0f°/%.0f°", it.high, it.low) } ?: "— / —")
                 setContentDescription(ids[0], "${date.format(DateTimeFormatter.ofPattern("d. M."))}: " + (day?.let {
                     "${weatherText(it.code)}, maximum ${it.high} °C, minimum ${it.low} °C"
-                } ?: "Predpoveď nie je dostupná"))
+                } ?: "Predpoveď nie je dostupná") + ". Otvoriť predpoveď na Windy.com.")
             }
             setImageViewResource(R.id.day_weather_icon, weather?.let { weatherIcon(it.code, it.isDay) } ?: R.drawable.weather_unknown)
             setContentDescription(R.id.day_weather_icon, weather?.let { weatherText(it.code) } ?: "Počasie zatiaľ nie je dostupné")

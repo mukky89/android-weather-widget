@@ -21,3 +21,12 @@ Modul sa presunul z `:day` do štandardného `:app`. Identita `sk.marek.den`, An
 Overenie samostatného zostavenia a testov sa vykonáva príkazom `scripts/build.ps1`; zostavenie instrumentation APK cez `:app:assembleDebugAndroidTest`. Výsledky vznikajú v `app/build/` a zostavovacie artefakty v ignorovanom `artifacts/`.
 
 Pri oddelení 14. 9. 2026 úspešne prešlo zostavenie z nového priečinka, všetkých 20 unit testov, lint aj zostavenie instrumentation APK. Všetkých 46 prenesených súborov modulu (zdroje, zdroje testov, resources, assets a modulový build súbor) bolo pred zápisom do Git porovnaných pomocou SHA256 s pôvodným modulom; boli zhodné. Testy na telefóne neboli znovu spúšťané, pretože kód aplikácie sa pri oddelení nemenil.
+
+## 0.8.0 — otvorenie podrobnej predpovede
+
+- Teplota, ikona počasia, mesto, popis počasia a celý pás predpovede otvárajú Windy.com. Hodiny naďalej otvárajú budíky a ozubené koliesko nastavenia Deň.
+- Interná ForecastActivity skladá odkaz až pri kliknutí. Odovzdá dve desatinné miesta poslednej polohy počasia; pri vypnutom počasí, odobratom povolení alebo chýbajúcich/neplatných súradniciach otvorí hlavnú stránku. Chýbajúci prehliadač ošetrí správou bez pádu aplikácie.
+- Zostavenie, všetkých 20 existujúcich unit testov a lint prešli. Verzia 0.8.0/code 8 nainštalovaná ako aktualizácia na testovací Xiaomi telefón.
+- Reálne kliknutie na teplotu aj samostatné kliknutie na jeden deň pásu otvorilo predpoveď zodpovedajúcej lokality vo Firefoxe. Vizuálne overená viacdňová aj podrobná predpoveď s teplotou, dažďom a vetrom/modelom ECMWF. Voliteľná anonymná analytika na stránke bola odmietnutá.
+- Fallback bez prehliadača a odobranie povolenia počas behu neboli testované na zariadení. Prevádzkové snímky a presná testovacia lokalita zostávajú v ignorovaných lokálnych artefaktoch.
+- Formát odkazu vychádza z [oficiálnej dokumentácie Windy URL](https://community.windy.com/topic/77/windy-com-url-parameters/1).
