@@ -1,17 +1,17 @@
 # Deň — Android weather & calendar widget
 
-Samostatná Android aplikácia v slovenčine: hodiny, počasie podľa GPS, predpoveď na šesť dní, meniny, budík a kalendáre. Aktuálna verzia **0.9.0**, Android **11 a novší**. Balík aplikácie: `sk.marek.den`.
+Samostatná Android aplikácia v slovenčine: hodiny, počasie podľa GPS, predpoveď na šesť dní, meniny, budík a kalendáre. Aktuálna verzia **0.10.0**, Android **11 a novší**. Balík aplikácie: `sk.marek.den`.
 
 ## Funkcie
 
-- Kompaktný widget s rámčekmi, živými hodinami a dátumom.
+- Widget s rámčekmi, väčšími hodinami, dátumom, ikonami počasia a teplotami. Budík a meniny sú v hornom riadku.
 - Aktuálne počasie podľa polohy a šesťdňová predpoveď s denným maximom/minimom.
 - Ťuknutie na mesto, teplotu, ikonu počasia alebo pás predpovede otvorí detail miesta na Windy.com.
 - Slovenské meniny uložené offline.
 - Najbližší budík a otvorenie systémových Hodín.
-- Najbližšia udalosť z Google/Gmail a Outlook kalendárov, horizont 14 dní.
-- Ľavá časť kalendárového riadku otvorí detail zobrazenej udalosti. Pravá časť s časom a **Celý deň ›** otvorí jej deň; bez udalosti otvorí dnešok. Denné zobrazenie používa Google Calendar, ak je dostupný, a rešpektuje kalendáre zapnuté v tejto aplikácii.
-- Tlačidlo **+** pri každom kalendári: názov, začiatok/koniec, celý deň, miesto a poznámka.
+- Najbližšia udalosť z Google/Gmail a Outlook kalendárov, horizont 14 dní. Časované stretnutie má prednosť pred celodennou udalosťou v rovnaký deň. Počítadlo zahŕňa všetky udalosti zobrazeného dňa vrátane už skončených a celodenných.
+- Ľavá časť kalendárového riadku otvorí detail zobrazenej udalosti. Pravá časť s počítadlom a **Celý deň ›** otvorí príslušný deň: Google riadok v Google Kalendári, Outlook riadok priamo v Outlooku. Bez udalosti otvorí dnešok.
+- Tlačidlo **+** otvára natívny formulár novej udalosti v aplikácii podľa riadku. Účet, čas a ostatné údaje vyberáš a ukladáš v nej. Google/Gmail riadok používa Google Kalendár.
 - Pripomenutia udalostí s predstihom 0/5/15/30/60 minút; celodenné udalosti o 9:00.
 - Voliteľný tichý prehľad na zamknutej obrazovke po rozsvietení displeja.
 
@@ -68,11 +68,11 @@ Pri oddelení projektu zostali `applicationId`, namespace, triedy komponentov a 
 5. Ak chceš pripomenutia, zapni ich v Deň a povoľ oznámenia aj systémový prístup **Budíky a pripomenutia**.
 6. Tichý prehľad na lockscreen zapni samostatne. Jeho názvy udalostí môžu byť viditeľné bez odomknutia.
 
-Widget má minimálny rozmer 250 × 290 dp. Skutočnú veľkosť a počet buniek riadi launcher. Existujúci widget môže po aktualizácii ponechať pôvodne rezervovaný priestor.
+Widget má minimálny rozmer 250 × 360 dp. Skutočnú veľkosť a počet buniek riadi launcher. Existujúci widget môže po aktualizácii ponechať pôvodne rezervovaný priestor; podľa potreby ho podrž a zväčši na výšku o jeden riadok.
 
 ## Súkromie a oprávnenia
 
-- Kalendáre sa čítajú z Android Calendar Provider; zápis sa vyžiada až pri uložení novej udalosti.
+- Kalendáre sa čítajú z Android Calendar Provider. Tlačidlo + odovzdá vytvorenie udalosti natívnej aplikácii; samo nič nezapisuje.
 - Poloha sa pred požiadavkou zaokrúhli na dve desatinné miesta a posiela Open-Meteo a systémovému geokóderu pre názov mesta. Neukladá sa história polohy.
 - Po otvorení podrobnej predpovede sa zaokrúhlená poloha z posledného počasia odovzdá v odkaze Windy.com. Pri chýbajúcej polohe, vypnutom počasí alebo odobratom prístupe k polohe sa otvorí iba hlavná stránka Windy. Samotný widget naďalej načítava počasie z Open-Meteo.
 - Udalosti sa neposielajú na náš server; synchronizáciu vytvorených udalostí vykonáva existujúci Google/Outlook adaptér v mobile.
@@ -85,7 +85,7 @@ Repozitár obsahuje zdroje, testovacie ukážky a verejný dataset menín. Prev�
 
 Počasie sa obnovuje približne každých 30 minút; Android môže úlohu odložiť. Ikona obnovy vyžiada načítanie. Počasie je modelový odhad Open-Meteo s časom modelových údajov. Chýbajúce dni predpovede zobrazia pomlčky.
 
-Kalendáre zahŕňajú opakovania cez systémové `Instances`, vynechajú zrušené a odmietnuté udalosti. Tlačidlá + neponúkajú kalendáre iba na čítanie. Formulár zatiaľ nepridáva hostí ani opakovanie.
+Kalendáre zahŕňajú opakovania cez systémové `Instances`, vynechajú zrušené a odmietnuté udalosti. Možnosti natívneho formulára, dostupné účty a vzhľad denného zobrazenia riadi Google Kalendár alebo Outlook. Ak cieľová aplikácia chýba, zobrazí sa správa; Outlook sa nenahrádza Google Kalendárom. Detail udalosti na ľavej strane naďalej používa Android provider ID cez Google Kalendár, ktorý dokáže zobraziť aj exportované Outlook udalosti.
 
 Na Xiaomi sa najbližšie budenie číta aj z `next_alarm_clock_formatted`: štandardné Android rozhranie môže na tomto zariadení zameniť polnočnú údržbu kalendára za budík. Po ukončení procesu sa údaj obnoví pri ďalšej obnove widgetu.
 

@@ -16,7 +16,8 @@ import java.time.format.DateTimeFormatter
 enum class CalendarSource(val label: String) { GOOGLE("Google · Gmail"), OUTLOOK("Outlook"), LOCAL("Ďalšie kalendáre") }
 data class DayCalendar(val id: Long, val name: String, val account: String, val source: CalendarSource, val writable: Boolean = false)
 data class DayEvent(val id: Long, val title: String, val begin: Long, val end: Long, val allDay: Boolean, val source: CalendarSource)
-data class Agenda(val calendars: List<DayCalendar> = emptyList(), val events: List<DayEvent> = emptyList(), val error: String? = null)
+data class Agenda(val calendars: List<DayCalendar> = emptyList(), val events: List<DayEvent> = emptyList(), val error: String? = null,
+    val dayEvents: List<DayEvent> = events)
 fun classifyCalendar(type: String, account: String): CalendarSource = when {
     type.contains("outlook", true) || type.contains("exchange", true) || type.contains("microsoft", true) -> CalendarSource.OUTLOOK
     type.contains("google", true) -> CalendarSource.GOOGLE
@@ -44,7 +45,9 @@ fun readAgenda(context: Context): Agenda {
         val enabled = calendars.filter { it.id.toString() !in hidden }.associateBy { it.id }
         if (enabled.isEmpty()) return Agenda(calendars)
         val now = System.currentTimeMillis()
-        val uri = CalendarContract.Instances.CONTENT_URI.buildUpon().also { ContentUris.appendId(it, now - 86400000); ContentUris.appendId(it, now + 14L * 86400000) }.build()
+        val today = Instant.ofEpochMilli(now).atZone(ZoneId.systemDefault()).toLocalDate()
+        val start = minOf(today.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli(), today.atStartOfDay(ZoneOffset.UTC).toInstant().toEpochMilli())
+        val uri = CalendarContract.Instances.CONTENT_URI.buildUpon().also { ContentUris.appendId(it, start); ContentUris.appendId(it, now + 14L * 86400000) }.build()
 
         val events = mutableListOf<DayEvent>()
         context.contentResolver.query(uri, arrayOf(I.EVENT_ID, I.TITLE, I.BEGIN, I.END, I.ALL_DAY, I.CALENDAR_ID),
@@ -53,9 +56,10 @@ fun readAgenda(context: Context): Agenda {
             while (cursor.moveToNext()) {
                 val calendar = enabled[cursor.getLong(5)] ?: continue
                 val event = DayEvent(cursor.getLong(0), cursor.getString(1)?.takeIf { it.isNotBlank() } ?: "Udalosť bez názvu", cursor.getLong(2), cursor.getLong(3), cursor.getInt(4) == 1, calendar.source)
-                if (eventIsUpcoming(event, now, ZoneId.systemDefault())) events += event
+                events += event
             }
         }
-        Agenda(calendars, events.distinctBy { Triple(it.id, it.begin, it.source) })
+        val unique = events.distinctBy { Triple(it.id, it.begin, it.source) }
+        Agenda(calendars, unique.filter { eventIsUpcoming(it, now, ZoneId.systemDefault()) }, dayEvents = unique)
     } catch (_: Exception) { Agenda(error = "Kalendáre sa nepodarilo načítať. Obnov údaje.") }
 }

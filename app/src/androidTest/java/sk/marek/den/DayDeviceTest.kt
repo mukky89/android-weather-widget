@@ -19,12 +19,27 @@ import org.json.JSONObject
 
 class DayDeviceTest {
     @get:Rule val compose = createAndroidComposeRule<DayActivity>()
+    @Test fun nativeCalendarRoutesKeepTheirSourceAndDate() {
+        val date = LocalDate.of(2026, 9, 16)
+        for (source in listOf(CalendarSource.GOOGLE, CalendarSource.OUTLOOK)) {
+            val day = calendarDayIntent(source, date)
+            assertEquals(calendarPackage(source), day.`package`)
+            assertEquals("time/epoch", day.type)
+            val at = android.content.ContentUris.parseId(day.data!!)
+            assertEquals(date, java.time.Instant.ofEpochMilli(at).atZone(java.time.ZoneId.systemDefault()).toLocalDate())
+            assertEquals("DAY", day.getStringExtra("VIEW"))
+            val insert = calendarInsertIntent(source)
+            assertEquals(calendarPackage(source), insert.`package`)
+            assertEquals(android.content.Intent.ACTION_INSERT, insert.action)
+            assertEquals("vnd.android.cursor.dir/event", insert.type)
+        }
+    }
     @Test fun localNamedaysAndWidgetRenderWithoutAccountAccess() {
         val context = compose.activity
         assertTrue(nameday(context, LocalDate.of(2026, 9, 14)).contains("Ľudomil"))
         assertTrue(nameday(context, LocalDate.of(2026, 4, 25)).contains("Marek"))
         compose.runOnUiThread {
-            for ((width, height) in listOf(250 to 290, 350 to 290)) {
+            for ((width, height) in listOf(250 to 360, 350 to 360)) {
                 val parent = FrameLayout(context)
                 context.addContentView(parent, android.view.ViewGroup.LayoutParams(-1, -1))
                 val fixture = Weather(18.0, 2, 12.0, 24.0, "Ukážka", System.currentTimeMillis(), System.currentTimeMillis(), 0.0, 0.0,
@@ -35,7 +50,7 @@ class DayDeviceTest {
                 val w = (width*d).toInt(); val h = (height*d).toInt()
                 view.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
                 view.layout(0, 0, w, h)
-                for (id in listOf(R.id.day_alarm, R.id.day_panel, R.id.forecast_temp_0, R.id.forecast_temp_5, R.id.outlook_title, R.id.outlook_add, R.id.google_day_area, R.id.outlook_day_area, R.id.day_weather_time)) {
+                for (id in listOf(R.id.day_alarm, R.id.day_panel, R.id.forecast_temp_0, R.id.forecast_temp_5, R.id.outlook_title, R.id.outlook_add, R.id.google_count, R.id.outlook_count, R.id.day_clock, R.id.day_date, R.id.day_temperature, R.id.google_day_area, R.id.outlook_day_area, R.id.day_weather_time)) {
                     val child = view.findViewById<View>(id)
                     val rect = android.graphics.Rect(); child.getDrawingRect(rect)
                     (view as android.view.ViewGroup).offsetDescendantRectToMyCoords(child, rect)

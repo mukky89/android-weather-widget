@@ -1,5 +1,16 @@
 # Overenie
 
+## 0.10.0 — väčší widget, počty udalostí a natívne kalendáre
+
+- Budík a meniny presunuté úplne hore. Zväčšené hodiny, dátum, aktuálna teplota a ikona, ikony aj teploty šesťdňovej predpovede. Výška widgetu zvýšená z 290 na 360 dp; cieľový rozmer je 4 × 5 buniek. Dátum sa na úzkom widgete automaticky zmenší.
+- Počítadlo pri každom zdroji zahŕňa všetky udalosti zobrazeného dňa, aj už skončené a celodenné. Časované stretnutie má prednosť pred celodennou udalosťou v ten istý deň. Počet zahŕňa iba kalendáre vybrané v Deň a rozlišuje zdroje; opakovaný záznam rovnakej inštancie nezapočíta dvakrát.
+- Pravá časť a + používajú explicitný balík podľa riadku. Outlook podporu potvrdilo rozhranie nainštalovanej aplikácie: `ACTION_VIEW` s `time/epoch` otvorí dátum a `ACTION_INSERT` s `vnd.android.cursor.dir/event` otvorí natívny formulár. Google používa rovnaké operácie vo vlastnom balíku. Chýbajúca cieľová aplikácia sa ošetrí správou bez presmerovania na iný kalendár.
+- 27 unit testov, zostavenie aplikácie a testovacieho APK aj lint prešli. Päť nových testov zahŕňa celodennú udalosť spolu so stretnutím, minulé udalosti, budúci deň, duplicitné inštancie, odlišné zdroje, polnočnú hranicu, viacdňovú udalosť a deň zmeny času.
+- Na Xiaomi 13 Lite prešli dva Android testy: render pri 250 × 360 dp a 350 × 360 dp s oddelenými klikacími plochami a kontrola balíkov/dátumu/MIME typov natívnych odkazov. Nové rozloženie bolo vizuálne skontrolované aj na existujúcom widgete na ploche.
+- Overené otvorenie správneho dňa v Google Kalendári aj Outlooku, vrátane iného než dnešného dňa v Outlooku, a natívne vytváranie udalosti v oboch aplikáciách. Pri kontrole sa žiadna udalosť neuložila.
+- Detail na ľavej strane naďalej otvára Android provider ID cez Google Kalendár aj pre exportovanú Outlook udalosť. Nová požiadavka na priamy Outlook sa týka pravej časti a tlačidla +.
+- Vzhľad a viditeľnosť kalendárov v otvorenom dni riadi natívna aplikácia. Test chýbajúcej cieľovej aplikácie sa na telefóne nevykonal. Osobné snímky, logy a údaje zostávajú v ignorovaných artefaktoch.
+
 ## 0.9.0 — samostatné otvorenie udalosti a dňa
 
 - Ľavá časť Google aj Outlook riadku otvára detail zobrazenej udalosti. Pravá časť má oddelenú plochu s časom a označením „Celý deň ›“; otvára dátum udalosti cez Calendar Provider time URI s `VIEW=DAY`. Tlačidlo + zostáva samostatné.

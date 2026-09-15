@@ -61,8 +61,8 @@ class DayActivity : ComponentActivity() {
                 } } }
                 item { Card(shape = RoundedCornerShape(20.dp)) { Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
                     Text("Stretnutia z kalendárov", fontWeight = FontWeight.Bold)
-                    Text("Vo widgete: vľavo otvoríš zobrazenú udalosť, vpravo dátum a Celý deň otvoria deň v kalendári. Tlačidlo + vytvorí udalosť.", fontSize = 12.sp)
-                    Text("Deň číta názov a čas udalostí z kalendárov synchronizovaných v Androide. Nečíta e-maily. Novú udalosť zapíše iba po stlačení Uložiť.", fontSize = 13.sp)
+                    Text("Vo widgete: vľavo otvoríš zobrazenú udalosť, vpravo dátum a Celý deň otvoria deň v kalendári. Počítadlo zahŕňa všetky udalosti daného dňa. Pravá časť aj + otvoria Google Kalendár alebo Outlook podľa riadku.", fontSize = 12.sp)
+                    Text("Deň číta názov a čas udalostí z kalendárov synchronizovaných v Androide. Nečíta e-maily. Novú udalosť vytvoríš priamo v Google Kalendári alebo Outlooku.", fontSize = 13.sp)
                     Button(onClick = { calendarPermission.launch(Manifest.permission.READ_CALENDAR) }) { Text(if (granted(Manifest.permission.READ_CALENDAR)) "Čítanie kalendárov povolené" else "Povoliť čítanie kalendárov") }
                     if (state.agenda.error != null) Text(state.agenda.error!!)
                     Text("Outlook: Nastavenia účtu → Kalendár → Synchronizovať kalendáre. Google: zapni synchronizáciu kalendára pri svojom účte.", fontSize = 12.sp)
@@ -80,7 +80,7 @@ class DayActivity : ComponentActivity() {
                 item { OutlinedButton(onClick = { app.scope.launch { app.refresh(true) } }, enabled = !state.loading, modifier = Modifier.fillMaxWidth()) { Text(if (state.loading) "Načítavam…" else "Obnoviť widget a udalosti") } }
                 item { Text("Meniny dnes: ${nameday(this@DayActivity)}", fontWeight = FontWeight.SemiBold)
                     Text("Počasie: Open-Meteo (CC BY 4.0). Meniny: name-day-calendar / Peter Knežek (MIT). Widget zobrazuje najbližšiu udalosť z každej skupiny v nasledujúcich 14 dňoch. Čas sa mení priamo na ploche.", fontSize = 11.sp)
-                    Text("Deň 0.9 · vytvorené pre Mareka", fontSize = 11.sp, modifier = Modifier.padding(top = 12.dp)) }
+                    Text("Deň 0.10 · vytvorené pre Mareka", fontSize = 11.sp, modifier = Modifier.padding(top = 12.dp)) }
             }
         }
     }
