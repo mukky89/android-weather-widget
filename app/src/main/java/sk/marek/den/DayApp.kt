@@ -28,6 +28,8 @@ data class DayState(val agenda: Agenda = Agenda(error = "Načítavam kalendáre�
     val weatherError: String? = null, val loading: Boolean = false)
 class DayApp : Application() {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+    var startupRefresh: Job? = null
+        private set
     val state = MutableStateFlow(DayState())
     private val mutex = Mutex()
     private var observed = false
@@ -48,7 +50,7 @@ class DayApp : Application() {
                     override fun onChange(selfChange: Boolean) { DayWidget.updateAll(this@DayApp, state.value) }
                 })
         } catch (_: SecurityException) { /* Periodic widget updates still refresh the alarm. */ }
-        scope.launch { refreshAgenda() }
+        startupRefresh = scope.launch { refreshAgenda() }
     }
     fun observeCalendars() {
         if (!observed && granted(android.Manifest.permission.READ_CALENDAR)) {

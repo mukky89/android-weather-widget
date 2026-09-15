@@ -1,5 +1,14 @@
 # Overenie
 
+## 0.13.0 — šípky na ručné prepínanie
+
+- Pri viacerých udalostiach sa pri názve kalendára zobrazia šípky predchádzajúca/nasledujúca. Posun cyklí medzi prvou a poslednou udalosťou. Jediná udalosť a prázdny deň šípky skryjú; automatický 8-sekundový cyklus zostáva zapnutý.
+- Každý snímok má vlastný cieľ posunu. Broadcast identifikuje kalendár aj konkrétny widget; aktualizuje iba príslušný ViewFlipper cez čiastočnú aktualizáciu s explicitným indexom. Google a Outlook majú odlišné ID flippera. Po štarte procesu sa posun vykoná po úvodnej obnove, aby sa nestratil.
+- Zostavenie, lint a 29 unit testov prešli. Nový test pokrýva oba smery, prechod cez okraje a prázdny/jediný záznam.
+- Na Xiaomi 13 Lite prešli tri Android testy: render so šípkami pri 250 × 360 a 350 × 360 dp, automatické striedanie a zastavenie pri jednom zázname, samostatný ručný posun dvoch kalendárov a opakované použitie rovnakého indexu bez ďalšieho posunu.
+- Verzia 0.13.0/code 13 nainštalovaná a vizuálne skontrolovaná. Na reálnej ploche overené kliknutia v oboch smeroch; po bezpečnom ukončení procesu aplikácie ďalšia šípka znovu spustila proces a zobrazila požadovaný index. Pri automatickom prechode môže snímok medzitým zmeniť index; automatický časovač sa šípkou nevypína.
+- Osobné snímky a prevádzkové logy zostávajú v ignorovaných lokálnych artefaktoch.
+
 ## 0.12.0 — striedanie udalostí v kalendároch
 
 - Každý kalendárový riadok samostatne strieda všetky udalosti počítané pre zobrazený deň v intervale 8 sekúnd. Začína najbližším časovaným stretnutím a zahŕňa aj celodenné a už skončené udalosti. Názov, čas, poradie a kliknutie na detail patria vždy rovnakému snímku.

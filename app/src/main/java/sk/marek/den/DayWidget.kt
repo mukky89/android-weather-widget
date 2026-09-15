@@ -20,6 +20,24 @@ import java.util.Locale
 class DayWidget : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
+        if (intent.action == PAGE) {
+            val widgetId = intent.getIntExtra("widget_id", AppWidgetManager.INVALID_APPWIDGET_ID)
+            val source = CalendarSource.entries.firstOrNull { it.name == intent.getStringExtra("source") } ?: return
+            val index = intent.getIntExtra("index", -1)
+            val count = intent.getIntExtra("count", 0)
+            val manager = AppWidgetManager.getInstance(context)
+            if (index !in 0 until count || manager.getAppWidgetInfo(widgetId)?.provider != ComponentName(context, DayWidget::class.java)) return
+            val pending = goAsync()
+            val app = context.applicationContext as DayApp
+            app.scope.launch {
+                try {
+                    // A cold process refreshes widgets at startup; apply the requested page afterwards.
+                    app.startupRefresh?.join()
+                    manager.partiallyUpdateAppWidget(widgetId, calendarPageViews(context, source, index))
+                } finally { pending.finish() }
+            }
+            return
+        }
         if (intent.action in setOf(AppWidgetManager.ACTION_APPWIDGET_UPDATE, AppWidgetManager.ACTION_APPWIDGET_OPTIONS_CHANGED,
                 Intent.ACTION_TIME_CHANGED, Intent.ACTION_TIMEZONE_CHANGED, Intent.ACTION_DATE_CHANGED, Intent.ACTION_BOOT_COMPLETED, Intent.ACTION_MY_PACKAGE_REPLACED, REFRESH)) {
             val pending = goAsync()
@@ -34,16 +52,17 @@ class DayWidget : AppWidgetProvider() {
     }
     companion object {
         const val REFRESH = "sk.marek.den.REFRESH"
+        const val PAGE = "sk.marek.den.CALENDAR_PAGE"
         fun requestPin(context: Context): Boolean {
             val manager = AppWidgetManager.getInstance(context)
             return manager.isRequestPinAppWidgetSupported && manager.requestPinAppWidget(ComponentName(context, DayWidget::class.java), null, null)
         }
         fun updateAll(context: Context, state: DayState) {
             val manager = AppWidgetManager.getInstance(context)
-            manager.getAppWidgetIds(ComponentName(context, DayWidget::class.java)).forEach { id -> manager.updateAppWidget(id, views(context, state)) }
+            manager.getAppWidgetIds(ComponentName(context, DayWidget::class.java)).forEach { id -> manager.updateAppWidget(id, views(context, state, id)) }
             LockscreenOverview.update(context, state)
         }
-        fun views(context: Context, state: DayState): RemoteViews = RemoteViews(context.packageName, R.layout.day_widget).apply {
+        fun views(context: Context, state: DayState, widgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID): RemoteViews = RemoteViews(context.packageName, R.layout.day_widget).apply {
             val open = PendingIntent.getActivity(context, 0, Intent(context, DayActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             setOnClickPendingIntent(R.id.day_root, open)
             setOnClickPendingIntent(R.id.day_settings, open)
@@ -126,7 +145,18 @@ class DayWidget : AppWidgetProvider() {
                 val events = calendarRotationEvents(state.agenda, source, summary)
                 val slides = events.map { it as DayEvent? }.ifEmpty { listOf(null) }.mapIndexed { index, event ->
                     RemoteViews(context.packageName, if (source == CalendarSource.GOOGLE) R.layout.calendar_google_row else R.layout.calendar_outlook_row).apply {
-                        setTextViewText(labelId, source.label.uppercase(Locale.forLanguageTag("sk-SK")) + if (events.size > 1) " · ${index + 1}/${events.size}" else "")
+                        setTextViewText(labelId, (if (source == CalendarSource.GOOGLE && events.size > 1) "GOOGLE" else source.label.uppercase(Locale.forLanguageTag("sk-SK"))) + if (events.size > 1) " · ${index + 1}/${events.size}" else "")
+                        val previousId = if (source == CalendarSource.GOOGLE) R.id.google_previous else R.id.outlook_previous
+                        val nextId = if (source == CalendarSource.GOOGLE) R.id.google_next else R.id.outlook_next
+                        for ((arrowId, direction) in listOf(previousId to -1, nextId to 1)) {
+                            setViewVisibility(arrowId, if (events.size > 1) android.view.View.VISIBLE else android.view.View.GONE)
+                            if (events.size > 1) setOnClickPendingIntent(arrowId, PendingIntent.getBroadcast(context, 0,
+                                Intent(context, DayWidget::class.java).setAction(PAGE)
+                                    .setData(android.net.Uri.parse("den://page/$widgetId/${source.name}/$index/$direction/${events.size}"))
+                                    .putExtra("widget_id", widgetId).putExtra("source", source.name)
+                                    .putExtra("index", calendarPageIndex(index, events.size, direction)).putExtra("count", events.size)
+                                    .addFlags(Intent.FLAG_RECEIVER_FOREGROUND), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+                        }
                         setOnClickPendingIntent(addId, PendingIntent.getActivity(context, 100 + source.ordinal,
                             Intent(context, CalendarActionActivity::class.java).putExtra("source", source.name).putExtra("insert", true),
                             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
@@ -156,8 +186,8 @@ class DayWidget : AppWidgetProvider() {
                 val container = if (source == CalendarSource.GOOGLE) R.id.google_row_container else R.id.outlook_row_container
                 removeAllViews(container)
                 if (slides.size == 1) addView(container, slides.single()) else {
-                    val flipper = RemoteViews(context.packageName, R.layout.calendar_rotation)
-                    slides.forEach { flipper.addView(R.id.calendar_flipper, it) }
+                    val flipper = RemoteViews(context.packageName, if (source == CalendarSource.GOOGLE) R.layout.calendar_rotation else R.layout.calendar_rotation_outlook)
+                    slides.forEach { flipper.addView(calendarFlipperId(source), it) }
                     addView(container, flipper)
                 }
             }

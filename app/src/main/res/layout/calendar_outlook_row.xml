@@ -2,7 +2,11 @@
 <LinearLayout android:id="@+id/outlook_event_area" android:layout_width="0dp" android:layout_weight="1" android:layout_height="match_parent" android:gravity="center_vertical" android:background="?android:attr/selectableItemBackground">
 <ImageView android:importantForAccessibility="no" android:layout_width="3dp" android:layout_height="24dp" android:background="#88D5F7" android:layout_marginEnd="7dp"/>
 <LinearLayout android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:orientation="vertical">
-<TextView android:id="@+id/outlook_label" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="OUTLOOK" android:textSize="8sp" android:textColor="#88D5F7" android:includeFontPadding="false" android:maxLines="1"/>
+<LinearLayout android:layout_width="match_parent" android:layout_height="24dp" android:gravity="center_vertical">
+<TextView android:id="@+id/outlook_label" android:layout_width="0dp" android:layout_weight="1" android:layout_height="wrap_content" android:text="OUTLOOK" android:textSize="8sp" android:textColor="#88D5F7" android:includeFontPadding="false" android:maxLines="1" android:ellipsize="end" android:autoSizeTextType="uniform" android:autoSizeMinTextSize="6sp" android:autoSizeMaxTextSize="8sp" android:autoSizeStepGranularity="1sp"/>
+<ImageView android:id="@+id/outlook_previous" android:layout_width="24dp" android:layout_height="24dp" android:padding="4dp" android:src="@drawable/ic_event_previous" android:background="@drawable/day_control" android:contentDescription="Predchádzajúca udalosť"/>
+<ImageView android:id="@+id/outlook_next" android:layout_width="24dp" android:layout_height="24dp" android:padding="4dp" android:src="@drawable/ic_event_next" android:background="@drawable/day_control" android:contentDescription="Nasledujúca udalosť"/>
+</LinearLayout>
 <TextView android:id="@+id/outlook_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:text="Pripojiť kalendár" android:textSize="12sp" android:textColor="#FFFFFF" android:maxLines="1" android:ellipsize="end" android:includeFontPadding="false" android:layout_marginTop="2dp"/>
 </LinearLayout></LinearLayout>
 <ImageView android:importantForAccessibility="no" android:layout_width="1dp" android:layout_height="24dp" android:layout_marginStart="4dp" android:background="#427B95B4"/>

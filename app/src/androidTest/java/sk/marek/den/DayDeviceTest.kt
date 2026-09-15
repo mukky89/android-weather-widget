@@ -19,6 +19,26 @@ import org.json.JSONObject
 
 class DayDeviceTest {
     @get:Rule val compose = createAndroidComposeRule<DayActivity>()
+    @Test fun manualPageChangesOnlyChosenCalendarAndIsIdempotent() {
+        val context = compose.activity
+        val now = System.currentTimeMillis()
+        val events = CalendarSource.entries.take(2).flatMap { source ->
+            (0..2).map { index -> DayEvent(800 + source.ordinal * 10L + index, "${source.name} $index", now, now + 60000, false, source) }
+        }
+        compose.runOnUiThread {
+            val view = DayWidget.views(context, DayState(agenda = Agenda(events = events))).apply(context, FrameLayout(context))
+            val google = view.findViewById<android.widget.ViewFlipper>(R.id.google_calendar_flipper)
+            val outlook = view.findViewById<android.widget.ViewFlipper>(R.id.outlook_calendar_flipper)
+            calendarPageViews(context, CalendarSource.OUTLOOK, 1).reapply(context, view)
+            val update = calendarPageViews(context, CalendarSource.GOOGLE, 2)
+            update.reapply(context, view)
+            update.reapply(context, view)
+            assertEquals(2, google.displayedChild)
+            assertEquals(1, outlook.displayedChild)
+            assertEquals("GOOGLE 2", google.currentView.findViewById<android.widget.TextView>(R.id.google_title).text.toString())
+            assertEquals("OUTLOOK 1", outlook.currentView.findViewById<android.widget.TextView>(R.id.outlook_title).text.toString())
+        }
+    }
     @Test fun eventsRotateTogetherAndStopWhenOnlyOneRemains() {
         val context = compose.activity
         val today = LocalDate.now()
@@ -37,11 +57,11 @@ class DayDeviceTest {
             context.addContentView(parent, android.view.ViewGroup.LayoutParams(-1, -1))
             view = DayWidget.views(context, DayState(agenda = agenda)).apply(context, parent)
             parent.addView(view)
-            flipper = view.findViewById<FrameLayout>(R.id.google_row_container).findViewById(R.id.calendar_flipper)
+            flipper = view.findViewById<FrameLayout>(R.id.google_row_container).findViewById(R.id.google_calendar_flipper)
             assertEquals(3, flipper.childCount)
             assertEquals(8000, flipper.flipInterval)
             assertEquals("Meeting one", flipper.currentView.findViewById<android.widget.TextView>(R.id.google_title).text.toString())
-            assertNull(view.findViewById<FrameLayout>(R.id.outlook_row_container).findViewById<View>(R.id.calendar_flipper))
+            assertNull(view.findViewById<FrameLayout>(R.id.outlook_row_container).findViewById<View>(R.id.outlook_calendar_flipper))
         }
         try {
             android.os.SystemClock.sleep(8500)
@@ -53,7 +73,7 @@ class DayDeviceTest {
                 assertTrue(current.findViewById<android.widget.TextView>(R.id.google_label).text.endsWith("2/3"))
                 val single = Agenda(calendars = agenda.calendars, events = listOf(first))
                 DayWidget.views(context, DayState(agenda = single)).reapply(context, view)
-                assertNull(view.findViewById<FrameLayout>(R.id.google_row_container).findViewById<View>(R.id.calendar_flipper))
+                assertNull(view.findViewById<FrameLayout>(R.id.google_row_container).findViewById<View>(R.id.google_calendar_flipper))
                 assertEquals("Meeting one", view.findViewById<android.widget.TextView>(R.id.google_title).text.toString())
             }
         } finally { compose.runOnUiThread { (parent.parent as android.view.ViewGroup).removeView(parent) } }
@@ -83,13 +103,15 @@ class DayDeviceTest {
                 context.addContentView(parent, android.view.ViewGroup.LayoutParams(-1, -1))
                 val fixture = Weather(18.0, 2, 12.0, 24.0, "Ukážka", System.currentTimeMillis(), System.currentTimeMillis(), 0.0, 0.0,
                     forecast = (0L..6L).map { ForecastDay(LocalDate.now().plusDays(it), listOf(2,0,3,61,95,71,1)[it.toInt()], 12.0-it, 24.0-it) })
-                val view = DayWidget.views(context, DayState(agenda = Agenda(), weather = fixture)).apply(context, parent)
+                val now = System.currentTimeMillis()
+                val events = (0..2).map { DayEvent(700L + it, "Example $it", now, now + 60000, false, CalendarSource.GOOGLE) }
+                val view = DayWidget.views(context, DayState(agenda = Agenda(events = events), weather = fixture)).apply(context, parent)
                 parent.addView(view)
                 val d = context.resources.displayMetrics.density
                 val w = (width*d).toInt(); val h = (height*d).toInt()
                 view.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
                 view.layout(0, 0, w, h)
-                for (id in listOf(R.id.day_alarm, R.id.day_panel, R.id.forecast_temp_0, R.id.forecast_temp_5, R.id.outlook_title, R.id.outlook_add, R.id.google_count, R.id.outlook_count, R.id.day_clock, R.id.day_date, R.id.day_temperature, R.id.google_day_area, R.id.outlook_day_area, R.id.day_toolbar, R.id.day_settings, R.id.day_refresh)) {
+                for (id in listOf(R.id.day_alarm, R.id.day_panel, R.id.forecast_temp_0, R.id.forecast_temp_5, R.id.outlook_title, R.id.outlook_add, R.id.google_count, R.id.outlook_count, R.id.google_previous, R.id.google_next, R.id.day_clock, R.id.day_date, R.id.day_temperature, R.id.google_day_area, R.id.outlook_day_area, R.id.day_toolbar, R.id.day_settings, R.id.day_refresh)) {
                     val child = view.findViewById<View>(id)
                     val rect = android.graphics.Rect(); child.getDrawingRect(rect)
                     (view as android.view.ViewGroup).offsetDescendantRectToMyCoords(child, rect)
