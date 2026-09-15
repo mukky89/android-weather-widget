@@ -56,4 +56,17 @@ class CalendarSummaryTest {
         assertTrue(eventTouchesDay(late, LocalDate.of(2026, 10, 25), zone))
         assertFalse(eventTouchesDay(late, LocalDate.of(2026, 10, 26), zone))
     }
+    @Test fun rotationStartsWithNextMeetingAndIncludesExactlyCountedDay() {
+        val birthday = event(1, "2026-09-15T00:00:00Z", "2026-09-16T00:00:00Z", true)
+        val finished = event(2, "2026-09-15T06:00:00Z", "2026-09-15T07:00:00Z")
+        val next = event(3, "2026-09-15T10:00:00Z", "2026-09-15T11:00:00Z")
+        val tomorrow = event(4, "2026-09-16T10:00:00Z", "2026-09-16T11:00:00Z")
+        val outlook = next.copy(id = 5, source = CalendarSource.OUTLOOK)
+        val agenda = Agenda(events = listOf(birthday, next, tomorrow, outlook), dayEvents = listOf(birthday, finished, next, next, tomorrow, outlook))
+        val summary = calendarSummary(agenda, CalendarSource.GOOGLE, Instant.parse("2026-09-15T09:00:00Z").toEpochMilli(), zone)
+        val rotation = calendarRotationEvents(agenda, CalendarSource.GOOGLE, summary, zone)
+        assertEquals(listOf(next, birthday, finished), rotation)
+        assertEquals(summary.count, rotation.size)
+        assertTrue(calendarRotationEvents(agenda.copy(error = "Unavailable"), CalendarSource.GOOGLE, summary, zone).isEmpty())
+    }
 }

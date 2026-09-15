@@ -122,32 +122,44 @@ class DayWidget : AppWidgetProvider() {
                 val hintId = if (source == CalendarSource.GOOGLE) R.id.google_day_hint else R.id.outlook_day_hint
                 val countId = if (source == CalendarSource.GOOGLE) R.id.google_count else R.id.outlook_count
                 val addId = if (source == CalendarSource.GOOGLE) R.id.google_add else R.id.outlook_add
-                setOnClickPendingIntent(addId, PendingIntent.getActivity(context, 100 + source.ordinal,
-                    Intent(context, CalendarActionActivity::class.java).putExtra("source", source.name).putExtra("insert", true),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
                 val summary = calendarSummary(state.agenda, source)
-                val event = summary.event
-                val available = state.agenda.calendars.any { it.source == source && it.id.toString() !in hidden }
-                setTextViewText(title, state.agenda.error ?: event?.title ?: if (available) "Bez udalostí · 14 dní" else "Pripojiť kalendár")
-                setTextViewText(time, event?.let { eventTime(it) } ?: "Dnes")
-                setTextViewText(countId, if (state.agenda.error != null || !available) "— udalostí" else eventCountLabel(summary.count))
-                val dayTarget = PendingIntent.getActivity(context, 300 + source.ordinal,
-                    Intent(context, CalendarActionActivity::class.java).putExtra("source", source.name).putExtra("date", summary.date.toString()),
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                val target = if (event == null) { if (available) dayTarget else open } else PendingIntent.getActivity(context, source.ordinal + 1,
-                    Intent(Intent.ACTION_VIEW, ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.id))
-                        .setIdentifier("${event.id}:${event.begin}")
-                        .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.begin).putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.end)
-                        .also { intent ->
-                            // Google Calendar opens Android provider IDs, including exported Outlook events.
-                            val google = Intent(intent).setPackage("com.google.android.calendar")
-                            if (google.resolveActivity(context.packageManager) != null) intent.setPackage("com.google.android.calendar")
-                        },
-                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-                for (id in listOf(leftId, labelId, title)) setOnClickPendingIntent(id, target)
-                for (id in listOf(rightId, time, countId, hintId)) setOnClickPendingIntent(id, dayTarget)
-                setContentDescription(leftId, event?.let { "Otvoriť udalosť: ${it.title}" } ?: if (available) "Otvoriť dnešný deň" else "Pripojiť kalendár")
-                setContentDescription(rightId, "${source.label}: otvoriť celý deň ${summary.date.format(DateTimeFormatter.ofPattern("d. M. yyyy"))}, ${eventCountLabel(summary.count)}")
+                val events = calendarRotationEvents(state.agenda, source, summary)
+                val slides = events.map { it as DayEvent? }.ifEmpty { listOf(null) }.mapIndexed { index, event ->
+                    RemoteViews(context.packageName, if (source == CalendarSource.GOOGLE) R.layout.calendar_google_row else R.layout.calendar_outlook_row).apply {
+                        setTextViewText(labelId, source.label.uppercase(Locale.forLanguageTag("sk-SK")) + if (events.size > 1) " · ${index + 1}/${events.size}" else "")
+                        setOnClickPendingIntent(addId, PendingIntent.getActivity(context, 100 + source.ordinal,
+                            Intent(context, CalendarActionActivity::class.java).putExtra("source", source.name).putExtra("insert", true),
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+                        val available = state.agenda.calendars.any { it.source == source && it.id.toString() !in hidden }
+                        setTextViewText(title, state.agenda.error ?: event?.title ?: if (available) "Bez udalostí · 14 dní" else "Pripojiť kalendár")
+                        setTextViewText(time, event?.let { eventTime(it) } ?: "Dnes")
+                        setTextViewText(countId, if (state.agenda.error != null || !available) "— udalostí" else eventCountLabel(summary.count))
+                        val dayTarget = PendingIntent.getActivity(context, 300 + source.ordinal,
+                            Intent(context, CalendarActionActivity::class.java).putExtra("source", source.name).putExtra("date", summary.date.toString()),
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                        val target = if (event == null) { if (available) dayTarget else open } else PendingIntent.getActivity(context, source.ordinal + 1,
+                            Intent(Intent.ACTION_VIEW, ContentUris.withAppendedId(CalendarContract.Events.CONTENT_URI, event.id))
+                                .setIdentifier("${event.id}:${event.begin}")
+                                .putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, event.begin).putExtra(CalendarContract.EXTRA_EVENT_END_TIME, event.end)
+                                .also { intent ->
+                                    // Google Calendar opens Android provider IDs, including exported Outlook events.
+                                    val google = Intent(intent).setPackage("com.google.android.calendar")
+                                    if (google.resolveActivity(context.packageManager) != null) intent.setPackage("com.google.android.calendar")
+                                },
+                            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                        for (id in listOf(leftId, labelId, title)) setOnClickPendingIntent(id, target)
+                        for (id in listOf(rightId, time, countId, hintId)) setOnClickPendingIntent(id, dayTarget)
+                        setContentDescription(leftId, event?.let { "Otvoriť udalosť: ${it.title}" } ?: if (available) "Otvoriť dnešný deň" else "Pripojiť kalendár")
+                        setContentDescription(rightId, "${source.label}: otvoriť celý deň ${summary.date.format(DateTimeFormatter.ofPattern("d. M. yyyy"))}, ${eventCountLabel(summary.count)}")
+                    }
+                }
+                val container = if (source == CalendarSource.GOOGLE) R.id.google_row_container else R.id.outlook_row_container
+                removeAllViews(container)
+                if (slides.size == 1) addView(container, slides.single()) else {
+                    val flipper = RemoteViews(context.packageName, R.layout.calendar_rotation)
+                    slides.forEach { flipper.addView(R.id.calendar_flipper, it) }
+                    addView(container, flipper)
+                }
             }
         }
     }

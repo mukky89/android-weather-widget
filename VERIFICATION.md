@@ -1,5 +1,14 @@
 # Overenie
 
+## 0.12.0 — striedanie udalostí v kalendároch
+
+- Každý kalendárový riadok samostatne strieda všetky udalosti počítané pre zobrazený deň v intervale 8 sekúnd. Začína najbližším časovaným stretnutím a zahŕňa aj celodenné a už skončené udalosti. Názov, čas, poradie a kliknutie na detail patria vždy rovnakému snímku.
+- Pre viac udalostí sa používajú vnorené RemoteViews vo ViewFlipper. Pri jednej alebo žiadnej udalosti zostáva obyčajný statický riadok bez časovača. Striedanie nevyžaduje nové čítanie kalendára, GPS, sieť, službu ani budenie aplikácie; časovač riadi zobrazenie v launcheri. Obnova údajov zostaví nový cyklus.
+- Zostavenie, lint a 28 unit testov prešli. Nový test overuje poradie, všetky započítané udalosti, oddelenie zdrojov a dátumov, deduplikáciu a stav pri chybe.
+- Verzia 0.12.0/code 12 nainštalovaná na Xiaomi 13 Lite. Dva Android testy prešli: render pri 250 × 360 a 350 × 360 dp a skutočné automatické prepnutie po 8 sekundách vrátane názvu, času, poradia a odstránenia ViewFlipper pri zmene na jednu udalosť.
+- Na skutočnej ploche overená zmena indexu 1/3 na 3/3 a prechod z časovanej na celodennú udalosť. Kliknutie na posledný snímok otvorilo presne zobrazenú udalosť. Pravá strana Outlooku stále otvorila vybraný deň priamo v Outlooku.
+- Snímky, osobné názvy a testovacie logy zostávajú lokálne. Pri zmene údajov alebo obnove widgetu sa poradie začína od prvého snímku.
+
 ## 0.11.0 — jednotné ovládanie hore
 
 - Budík a meniny majú kompaktné stĺpce zarovnané vľavo, malé popisy a jemný oddeľovač. Obnova a nastavenia sú vedľa nich ako dvojica rovnako veľkých tlačidiel s vektorovými ikonami.

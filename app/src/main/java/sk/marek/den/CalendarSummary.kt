@@ -33,3 +33,13 @@ fun eventCountLabel(count: Int): String = when (count) {
     in 2..4 -> "$count udalosti"
     else -> "$count udalostí"
 }
+
+fun calendarRotationEvents(agenda: Agenda, source: CalendarSource, summary: CalendarSummary,
+    zone: ZoneId = ZoneId.systemDefault()): List<DayEvent> {
+    if (agenda.error != null) return emptyList()
+    val events = agenda.dayEvents.filter { it.source == source && eventTouchesDay(it, summary.date, zone) }
+        .distinctBy { it.id to it.begin }.sortedWith(compareBy<DayEvent> { it.allDay }.thenBy { it.begin })
+    // Start with the next meeting, then show every event counted for this day, including all-day events.
+    val first = events.indexOfFirst { it.id == summary.event?.id && it.begin == summary.event.begin }
+    return if (first > 0) events.drop(first) + events.take(first) else events
+}

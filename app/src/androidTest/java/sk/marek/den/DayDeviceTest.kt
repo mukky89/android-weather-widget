@@ -19,6 +19,45 @@ import org.json.JSONObject
 
 class DayDeviceTest {
     @get:Rule val compose = createAndroidComposeRule<DayActivity>()
+    @Test fun eventsRotateTogetherAndStopWhenOnlyOneRemains() {
+        val context = compose.activity
+        val today = LocalDate.now()
+        val start = today.atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+        val first = DayEvent(901, "Meeting one", start, start + 86400000, false, CalendarSource.GOOGLE)
+        val second = first.copy(id = 902, title = "Meeting two", begin = start + 60000)
+        val birthday = first.copy(id = 903, title = "Birthday", allDay = true,
+            begin = today.atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli(),
+            end = today.plusDays(1).atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli())
+        val agenda = Agenda(calendars = listOf(DayCalendar(901, "Example", "example.test", CalendarSource.GOOGLE)), events = listOf(first, second, birthday))
+        lateinit var parent: FrameLayout
+        lateinit var view: View
+        lateinit var flipper: android.widget.ViewFlipper
+        compose.runOnUiThread {
+            parent = FrameLayout(context)
+            context.addContentView(parent, android.view.ViewGroup.LayoutParams(-1, -1))
+            view = DayWidget.views(context, DayState(agenda = agenda)).apply(context, parent)
+            parent.addView(view)
+            flipper = view.findViewById<FrameLayout>(R.id.google_row_container).findViewById(R.id.calendar_flipper)
+            assertEquals(3, flipper.childCount)
+            assertEquals(8000, flipper.flipInterval)
+            assertEquals("Meeting one", flipper.currentView.findViewById<android.widget.TextView>(R.id.google_title).text.toString())
+            assertNull(view.findViewById<FrameLayout>(R.id.outlook_row_container).findViewById<View>(R.id.calendar_flipper))
+        }
+        try {
+            android.os.SystemClock.sleep(8500)
+            compose.runOnUiThread {
+                assertEquals(1, flipper.displayedChild)
+                val current = flipper.currentView
+                assertEquals("Meeting two", current.findViewById<android.widget.TextView>(R.id.google_title).text.toString())
+                assertEquals(eventTime(second), current.findViewById<android.widget.TextView>(R.id.google_time).text.toString())
+                assertTrue(current.findViewById<android.widget.TextView>(R.id.google_label).text.endsWith("2/3"))
+                val single = Agenda(calendars = agenda.calendars, events = listOf(first))
+                DayWidget.views(context, DayState(agenda = single)).reapply(context, view)
+                assertNull(view.findViewById<FrameLayout>(R.id.google_row_container).findViewById<View>(R.id.calendar_flipper))
+                assertEquals("Meeting one", view.findViewById<android.widget.TextView>(R.id.google_title).text.toString())
+            }
+        } finally { compose.runOnUiThread { (parent.parent as android.view.ViewGroup).removeView(parent) } }
+    }
     @Test fun nativeCalendarRoutesKeepTheirSourceAndDate() {
         val date = LocalDate.of(2026, 9, 16)
         for (source in listOf(CalendarSource.GOOGLE, CalendarSource.OUTLOOK)) {

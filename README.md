@@ -1,6 +1,6 @@
 # Deň — Android weather & calendar widget
 
-Samostatná Android aplikácia v slovenčine: hodiny, počasie podľa GPS, predpoveď na šesť dní, meniny, budík a kalendáre. Aktuálna verzia **0.11.0**, Android **11 a novší**. Balík aplikácie: `sk.marek.den`.
+Samostatná Android aplikácia v slovenčine: hodiny, počasie podľa GPS, predpoveď na šesť dní, meniny, budík a kalendáre. Aktuálna verzia **0.12.0**, Android **11 a novší**. Balík aplikácie: `sk.marek.den`.
 
 ## Funkcie
 
@@ -11,6 +11,7 @@ Samostatná Android aplikácia v slovenčine: hodiny, počasie podľa GPS, predp
 - Najbližší budík a otvorenie systémových Hodín.
 - Najbližšia udalosť z Google/Gmail a Outlook kalendárov, horizont 14 dní. Časované stretnutie má prednosť pred celodennou udalosťou v rovnaký deň. Počítadlo zahŕňa všetky udalosti zobrazeného dňa vrátane už skončených a celodenných.
 - Ľavá časť kalendárového riadku otvorí detail zobrazenej udalosti. Pravá časť s počítadlom a **Celý deň ›** otvorí príslušný deň: Google riadok v Google Kalendári, Outlook riadok priamo v Outlooku. Bez udalosti otvorí dnešok.
+- Pri viacerých udalostiach zobrazeného dňa sa názov, čas a odkaz na detail menia každých 8 sekúnd. Poradie ukazuje napríklad **1/3** pri názve kalendára. Cyklus zahŕňa celodenné aj už skončené udalosti z počítadla a začína najbližším stretnutím. Jediná udalosť zostáva statická. Obnova widgetu začne cyklus znovu.
 - Tlačidlo **+** otvára natívny formulár novej udalosti v aplikácii podľa riadku. Účet, čas a ostatné údaje vyberáš a ukladáš v nej. Google/Gmail riadok používa Google Kalendár.
 - Pripomenutia udalostí s predstihom 0/5/15/30/60 minút; celodenné udalosti o 9:00.
 - Voliteľný tichý prehľad na zamknutej obrazovke po rozsvietení displeja.
