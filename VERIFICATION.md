@@ -1,5 +1,14 @@
 # Overenie
 
+## 0.14.0 — zmenšenie rezervovaného priestoru
+
+- Predvolený rozmer je 4 × 4 bunky, minHeight aj minResizeHeight sú 250 dp. Launcher pôvodne rezervoval päť riadkov aj pri nižšom obsahu. Samotný limit 320 dp na tomto Xiaomi stále neumožnil zmenšenie; finálny limit 250 dp ho umožnil.
+- Tri rozloženia sa vyberajú podľa výšky oznámenej hostiteľom, osobitne pre každý widget. Menšie varianty znižujú výšku horného panelu, hodín a predpovede; kalendáre zachovávajú ovládanie a 48 dp riadky. Čiastočný posun udalostí používa rovnaký variant ako plná aktualizácia. Po zmene veľkosti sa rozloženie obnoví.
+- Zostavenie aplikácie, testovacieho APK a lint prešli. Na Xiaomi 13 Lite prešli dva Android testy: render pri 250 × 250, 350 × 250, 250 × 320, 350 × 320 a 350 × 360 dp bez presahu kontrolovaných prvkov a s oddelenými klikacími oblasťami; nezávislý a idempotentný ručný posun kalendárov. Unit testy sa pri tejto úprave rozloženia neopakovali.
+- Aktualizácia 0.14.0/code 14 bola nainštalovaná. Existujúci widget bol na hlavnej ploche skutočne zmenšený o jednu bunku na výšku: rezervovaná výška klesla z 1226 na 971 px. Panel obsahu zostal vysoký 953 px, takže plné hodiny a ikony zostávajú bez zmenšenia; prázdny rezervovaný pás klesol z 273 na 18 px.
+- Rozmer aj obsah zostali správne po odchode na susednú plochu a návrate. Widget sa nemusel odstrániť ani znovu pridávať. Testovacie snímky, logy a osobné údaje zostávajú lokálne.
+- K prepočtu buniek a adaptívnym variantom: [Xiaomi FAQ](https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1591), [odporúčania Xiaomi](https://dev.mi.com/xiaomihyperos/documentation/detail?pId=1585), [Android flexible widget layouts](https://developer.android.com/develop/ui/views/appwidgets/layouts).
+
 ## 0.13.0 — šípky na ručné prepínanie
 
 - Pri viacerých udalostiach sa pri názve kalendára zobrazia šípky predchádzajúca/nasledujúca. Posun cyklí medzi prvou a poslednou udalosťou. Jediná udalosť a prázdny deň šípky skryjú; automatický 8-sekundový cyklus zostáva zapnutý.

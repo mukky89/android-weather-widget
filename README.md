@@ -1,6 +1,6 @@
 # Deň — Android weather & calendar widget
 
-Samostatná Android aplikácia v slovenčine: hodiny, počasie podľa GPS, predpoveď na šesť dní, meniny, budík a kalendáre. Aktuálna verzia **0.13.0**, Android **11 a novší**. Balík aplikácie: `sk.marek.den`.
+Samostatná Android aplikácia v slovenčine: hodiny, počasie podľa GPS, predpoveď na šesť dní, meniny, budík a kalendáre. Aktuálna verzia **0.14.0**, Android **11 a novší**. Balík aplikácie: `sk.marek.den`.
 
 ## Funkcie
 
@@ -69,7 +69,7 @@ Pri oddelení projektu zostali `applicationId`, namespace, triedy komponentov a 
 5. Ak chceš pripomenutia, zapni ich v Deň a povoľ oznámenia aj systémový prístup **Budíky a pripomenutia**.
 6. Tichý prehľad na lockscreen zapni samostatne. Jeho názvy udalostí môžu byť viditeľné bez odomknutia.
 
-Widget má minimálny rozmer 250 × 360 dp. Skutočnú veľkosť a počet buniek riadi launcher. Existujúci widget môže po aktualizácii ponechať pôvodne rezervovaný priestor; podľa potreby ho podrž a zväčši na výšku o jeden riadok.
+Widget má cieľový rozmer 4 × 4 bunky a povoľuje zmenšenie od 250 × 250 dp. Podľa dostupnej výšky používa plné (od 346 dp), kompaktné (od 320 dp) alebo malé rozloženie. Počet buniek a skutočnú výšku určuje launcher. Existujúci widget môže po aktualizácii ponechať pôvodne rezervovaný priestor: podrž ho, vyber Prispôsobiť veľkosť a potiahni spodnú hranu nahor. Na Xiaomi 13 Lite bolo overené uvoľnenie jedného riadka pri zachovaní plného rozloženia.
 
 ## Súkromie a oprávnenia
 

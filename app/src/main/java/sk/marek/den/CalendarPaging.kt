@@ -9,5 +9,6 @@ fun calendarPageIndex(current: Int, count: Int, direction: Int): Int =
 fun calendarFlipperId(source: CalendarSource): Int = if (source == CalendarSource.GOOGLE)
     R.id.google_calendar_flipper else R.id.outlook_calendar_flipper
 
-fun calendarPageViews(context: Context, source: CalendarSource, index: Int): RemoteViews =
-    RemoteViews(context.packageName, R.layout.day_widget).apply { setDisplayedChild(calendarFlipperId(source), index) }
+fun calendarPageViews(context: Context, source: CalendarSource, index: Int,
+    widgetId: Int = android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID): RemoteViews =
+    RemoteViews(context.packageName, dayWidgetLayout(context, widgetId)).apply { setDisplayedChild(calendarFlipperId(source), index) }

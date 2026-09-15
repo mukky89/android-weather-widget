@@ -98,14 +98,14 @@ class DayDeviceTest {
         assertTrue(nameday(context, LocalDate.of(2026, 9, 14)).contains("Ľudomil"))
         assertTrue(nameday(context, LocalDate.of(2026, 4, 25)).contains("Marek"))
         compose.runOnUiThread {
-            for ((width, height) in listOf(250 to 360, 350 to 360)) {
+            for ((width, height) in listOf(250 to 250, 350 to 250, 250 to 320, 350 to 320, 350 to 360)) {
                 val parent = FrameLayout(context)
                 context.addContentView(parent, android.view.ViewGroup.LayoutParams(-1, -1))
                 val fixture = Weather(18.0, 2, 12.0, 24.0, "Ukážka", System.currentTimeMillis(), System.currentTimeMillis(), 0.0, 0.0,
                     forecast = (0L..6L).map { ForecastDay(LocalDate.now().plusDays(it), listOf(2,0,3,61,95,71,1)[it.toInt()], 12.0-it, 24.0-it) })
                 val now = System.currentTimeMillis()
                 val events = (0..2).map { DayEvent(700L + it, "Example $it", now, now + 60000, false, CalendarSource.GOOGLE) }
-                val view = DayWidget.views(context, DayState(agenda = Agenda(events = events), weather = fixture)).apply(context, parent)
+                val view = DayWidget.views(context, DayState(agenda = Agenda(events = events), weather = fixture), layoutId = if (height < 320) R.layout.day_widget_small else if (height < 346) R.layout.day_widget_compact else R.layout.day_widget).apply(context, parent)
                 parent.addView(view)
                 val d = context.resources.displayMetrics.density
                 val w = (width*d).toInt(); val h = (height*d).toInt()
@@ -126,7 +126,7 @@ class DayDeviceTest {
                 }
                 assertEquals("HH:mm", view.findViewById<TextClock>(R.id.day_clock).format24Hour.toString())
                 val b = Bitmap.createBitmap(w,h,Bitmap.Config.ARGB_8888); view.draw(Canvas(b))
-                File(context.filesDir,"day-widget-$width.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG,100,it) }
+                File(context.filesDir,"day-widget-$width-$height.png").outputStream().use { b.compress(Bitmap.CompressFormat.PNG,100,it) }
                 (parent.parent as android.view.ViewGroup).removeView(parent)
             }
         }

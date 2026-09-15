@@ -33,7 +33,7 @@ class DayWidget : AppWidgetProvider() {
                 try {
                     // A cold process refreshes widgets at startup; apply the requested page afterwards.
                     app.startupRefresh?.join()
-                    manager.partiallyUpdateAppWidget(widgetId, calendarPageViews(context, source, index))
+                    manager.partiallyUpdateAppWidget(widgetId, calendarPageViews(context, source, index, widgetId))
                 } finally { pending.finish() }
             }
             return
@@ -62,7 +62,8 @@ class DayWidget : AppWidgetProvider() {
             manager.getAppWidgetIds(ComponentName(context, DayWidget::class.java)).forEach { id -> manager.updateAppWidget(id, views(context, state, id)) }
             LockscreenOverview.update(context, state)
         }
-        fun views(context: Context, state: DayState, widgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID): RemoteViews = RemoteViews(context.packageName, R.layout.day_widget).apply {
+        fun views(context: Context, state: DayState, widgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID,
+            layoutId: Int = dayWidgetLayout(context, widgetId)): RemoteViews = RemoteViews(context.packageName, layoutId).apply {
             val open = PendingIntent.getActivity(context, 0, Intent(context, DayActivity::class.java), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
             setOnClickPendingIntent(R.id.day_root, open)
             setOnClickPendingIntent(R.id.day_settings, open)
