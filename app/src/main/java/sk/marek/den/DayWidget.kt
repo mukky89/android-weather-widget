@@ -64,6 +64,7 @@ class DayWidget : AppWidgetProvider() {
                 Instant.ofEpochMilli(alarm.triggerTime).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("EEEE d. M. HH:mm", Locale.forLanguageTag("sk-SK"))) + ". Otvoriť budíky."
                 else alarmText)
             setOnClickPendingIntent(R.id.day_alarm, alarmTarget ?: open)
+            setOnClickPendingIntent(R.id.day_alarm_area, alarmTarget ?: open)
             setOnClickPendingIntent(R.id.day_clock, alarmTarget ?: open)
             setOnClickPendingIntent(R.id.day_refresh, PendingIntent.getBroadcast(context, 0,
                 Intent(context, DayWidget::class.java).setAction(REFRESH).addFlags(Intent.FLAG_RECEIVER_FOREGROUND), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
@@ -102,7 +103,7 @@ class DayWidget : AppWidgetProvider() {
                 setTextViewText(R.id.day_temperature, "— °C")
                 setTextViewText(R.id.day_weather, state.weatherError ?: "Nastav počasie podľa polohy")
                 setTextViewText(R.id.day_city, "Počasie podľa GPS")
-                setTextViewText(R.id.day_weather_time, "Ťukni na nastavenia")
+                setContentDescription(R.id.day_refresh, "Obnoviť počasie a udalosti. Počasie zatiaľ nie je dostupné.")
             } else {
                 fun degree(value: Double) = String.format(Locale.forLanguageTag("sk-SK"), "%.0f°", value)
                 setTextViewText(R.id.day_temperature, degree(weather.temperature))
@@ -110,7 +111,7 @@ class DayWidget : AppWidgetProvider() {
                 setTextViewText(R.id.day_city, weather.city)
                 val age = System.currentTimeMillis() - weather.modelTime
                 val time = Instant.ofEpochMilli(weather.modelTime).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern(if (age > 86400000) "d.M. HH:mm" else "HH:mm"))
-                setTextViewText(R.id.day_weather_time, state.weatherError ?: "Open-Meteo · ${if (age > 90 * 60000) "staršie " else ""}$time")
+                setContentDescription(R.id.day_refresh, "Obnoviť počasie a udalosti. " + (state.weatherError ?: "Open-Meteo · ${if (age > 90 * 60000) "staršie " else ""}$time"))
             }
             val hidden = context.getSharedPreferences("day", Context.MODE_PRIVATE).getStringSet("hidden_calendars", emptySet()).orEmpty()
             val rows = listOf(Triple(CalendarSource.GOOGLE, R.id.google_title, R.id.google_time), Triple(CalendarSource.OUTLOOK, R.id.outlook_title, R.id.outlook_time))

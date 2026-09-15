@@ -1,10 +1,10 @@
 # Deň — Android weather & calendar widget
 
-Samostatná Android aplikácia v slovenčine: hodiny, počasie podľa GPS, predpoveď na šesť dní, meniny, budík a kalendáre. Aktuálna verzia **0.10.0**, Android **11 a novší**. Balík aplikácie: `sk.marek.den`.
+Samostatná Android aplikácia v slovenčine: hodiny, počasie podľa GPS, predpoveď na šesť dní, meniny, budík a kalendáre. Aktuálna verzia **0.11.0**, Android **11 a novší**. Balík aplikácie: `sk.marek.den`.
 
 ## Funkcie
 
-- Widget s rámčekmi, väčšími hodinami, dátumom, ikonami počasia a teplotami. Budík a meniny sú v hornom riadku.
+- Widget s rámčekmi, väčšími hodinami, dátumom, ikonami počasia a teplotami. Budík a meniny sú vedľa seba v hornom paneli spolu s tlačidlami obnovy a nastavení. Spodný ovládací riadok je odstránený.
 - Aktuálne počasie podľa polohy a šesťdňová predpoveď s denným maximom/minimom.
 - Ťuknutie na mesto, teplotu, ikonu počasia alebo pás predpovede otvorí detail miesta na Windy.com.
 - Slovenské meniny uložené offline.

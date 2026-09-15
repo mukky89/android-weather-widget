@@ -80,7 +80,7 @@ class DayActivity : ComponentActivity() {
                 item { OutlinedButton(onClick = { app.scope.launch { app.refresh(true) } }, enabled = !state.loading, modifier = Modifier.fillMaxWidth()) { Text(if (state.loading) "Načítavam…" else "Obnoviť widget a udalosti") } }
                 item { Text("Meniny dnes: ${nameday(this@DayActivity)}", fontWeight = FontWeight.SemiBold)
                     Text("Počasie: Open-Meteo (CC BY 4.0). Meniny: name-day-calendar / Peter Knežek (MIT). Widget zobrazuje najbližšiu udalosť z každej skupiny v nasledujúcich 14 dňoch. Čas sa mení priamo na ploche.", fontSize = 11.sp)
-                    Text("Deň 0.10 · vytvorené pre Mareka", fontSize = 11.sp, modifier = Modifier.padding(top = 12.dp)) }
+                    Text("Deň 0.11 · vytvorené pre Mareka", fontSize = 11.sp, modifier = Modifier.padding(top = 12.dp)) }
             }
         }
     }

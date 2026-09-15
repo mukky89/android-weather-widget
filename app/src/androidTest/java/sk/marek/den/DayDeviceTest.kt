@@ -50,7 +50,7 @@ class DayDeviceTest {
                 val w = (width*d).toInt(); val h = (height*d).toInt()
                 view.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
                 view.layout(0, 0, w, h)
-                for (id in listOf(R.id.day_alarm, R.id.day_panel, R.id.forecast_temp_0, R.id.forecast_temp_5, R.id.outlook_title, R.id.outlook_add, R.id.google_count, R.id.outlook_count, R.id.day_clock, R.id.day_date, R.id.day_temperature, R.id.google_day_area, R.id.outlook_day_area, R.id.day_weather_time)) {
+                for (id in listOf(R.id.day_alarm, R.id.day_panel, R.id.forecast_temp_0, R.id.forecast_temp_5, R.id.outlook_title, R.id.outlook_add, R.id.google_count, R.id.outlook_count, R.id.day_clock, R.id.day_date, R.id.day_temperature, R.id.google_day_area, R.id.outlook_day_area, R.id.day_toolbar, R.id.day_settings, R.id.day_refresh)) {
                     val child = view.findViewById<View>(id)
                     val rect = android.graphics.Rect(); child.getDrawingRect(rect)
                     (view as android.view.ViewGroup).offsetDescendantRectToMyCoords(child, rect)

@@ -1,5 +1,12 @@
 # Overenie
 
+## 0.11.0 — jednotné ovládanie hore
+
+- Budík a meniny majú kompaktné stĺpce zarovnané vľavo, malé popisy a jemný oddeľovač. Obnova a nastavenia sú vedľa nich ako dvojica rovnako veľkých tlačidiel s vektorovými ikonami.
+- Spodný riadok je odstránený; panel končí Outlook kalendárom. Informácia o poslednom počasí zostáva v popise tlačidla obnovy pre prístupnosť, zdroj dát a atribúcia sú tiež v nastaveniach aplikácie.
+- Zostavenie aplikácie, testovacieho APK a lint prešli. Verzia 0.11.0/code 11 nainštalovaná na Xiaomi 13 Lite a vizuálne overená na existujúcom widgete. Nastavenia a budík sa otvorili cez presunuté horné prvky; overené aj stlačenie obnovy na ploche.
+- Test rozloženia bol upravený na nové ID horného panelu. Inštaláciu pomocného testovacieho APK telefón odmietol (`INSTALL_FAILED_USER_RESTRICTED`), takže automatizovaný render pri dvoch šírkach sa v tejto verzii nespustil. Overenie prebehlo ručne na reálnom widgete; unit testy sa pri tejto úprave rozloženia neopakovali.
+
 ## 0.10.0 — väčší widget, počty udalostí a natívne kalendáre
 
 - Budík a meniny presunuté úplne hore. Zväčšené hodiny, dátum, aktuálna teplota a ikona, ikony aj teploty šesťdňovej predpovede. Výška widgetu zvýšená z 290 na 360 dp; cieľový rozmer je 4 × 5 buniek. Dátum sa na úzkom widgete automaticky zmenší.
