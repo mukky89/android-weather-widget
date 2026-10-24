@@ -19,6 +19,17 @@ import org.json.JSONObject
 
 class DayDeviceTest {
     @get:Rule val compose = createAndroidComposeRule<DayActivity>()
+    @Test fun calendarRefreshButtonReloadsAgenda() {
+        val context = compose.activity
+        val app = context.application as DayApp
+        runBlocking { app.startupRefresh?.join() }
+        val before = app.state.value.agendaCheckedAt
+        compose.runOnUiThread {
+            val view = DayWidget.views(context, app.state.value).apply(context, FrameLayout(context))
+            assertTrue(view.findViewById<View>(R.id.day_calendar_refresh).performClick())
+        }
+        compose.waitUntil(10000) { app.state.value.agendaCheckedAt > before }
+    }
     @Test fun manualPageChangesOnlyChosenCalendarAndIsIdempotent() {
         val context = compose.activity
         val now = System.currentTimeMillis()
@@ -111,12 +122,17 @@ class DayDeviceTest {
                 val w = (width*d).toInt(); val h = (height*d).toInt()
                 view.measure(View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY), View.MeasureSpec.makeMeasureSpec(h, View.MeasureSpec.EXACTLY))
                 view.layout(0, 0, w, h)
-                for (id in listOf(R.id.day_alarm, R.id.day_panel, R.id.forecast_temp_0, R.id.forecast_temp_5, R.id.outlook_title, R.id.outlook_add, R.id.google_count, R.id.outlook_count, R.id.google_previous, R.id.google_next, R.id.day_clock, R.id.day_date, R.id.day_temperature, R.id.google_day_area, R.id.outlook_day_area, R.id.day_toolbar, R.id.day_settings, R.id.day_refresh)) {
+                for (id in listOf(R.id.day_alarm, R.id.day_panel, R.id.forecast_temp_0, R.id.forecast_temp_5, R.id.outlook_title, R.id.outlook_add, R.id.google_count, R.id.outlook_count, R.id.google_previous, R.id.google_next, R.id.day_clock, R.id.day_date, R.id.day_temperature, R.id.google_day_area, R.id.outlook_day_area, R.id.day_toolbar, R.id.day_settings, R.id.day_refresh, R.id.day_calendar_refresh)) {
                     val child = view.findViewById<View>(id)
                     val rect = android.graphics.Rect(); child.getDrawingRect(rect)
                     (view as android.view.ViewGroup).offsetDescendantRectToMyCoords(child, rect)
                     assertTrue("Clipped view $id: $rect / $h", rect.bottom <= h && rect.right <= w && rect.top >= 0 && rect.left >= 0)
                 }
+                val calendarRefresh = view.findViewById<View>(R.id.day_calendar_refresh)
+                val weatherRefresh = view.findViewById<View>(R.id.day_refresh)
+                val settings = view.findViewById<View>(R.id.day_settings)
+                assertTrue(calendarRefresh.width > 0 && calendarRefresh.right <= weatherRefresh.left && weatherRefresh.right <= settings.left)
+                assertTrue(calendarRefresh.hasOnClickListeners())
                 for ((leftId, rightId, addId) in listOf(Triple(R.id.google_event_area, R.id.google_day_area, R.id.google_add), Triple(R.id.outlook_event_area, R.id.outlook_day_area, R.id.outlook_add))) {
                     val left = view.findViewById<View>(leftId)
                     val right = view.findViewById<View>(rightId)
