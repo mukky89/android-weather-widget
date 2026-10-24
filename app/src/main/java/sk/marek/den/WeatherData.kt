@@ -11,6 +11,7 @@ import android.os.CancellationSignal
 import android.os.SystemClock
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlinx.coroutines.CancellationException
 import org.json.JSONObject
 import java.net.URL
 import java.util.Locale
@@ -71,27 +72,36 @@ suspend fun cityName(context: Context, lat: Double, lon: Double): String {
     } else runCatching { geocoder.getFromLocation(lat, lon, 1) }.getOrNull()
     return addresses?.firstOrNull()?.let { it.locality ?: it.subAdminArea ?: it.adminArea } ?: "Aktuálna poloha"
 }
-suspend fun loadWeather(context: Context, foreground: Boolean): Pair<Weather?, String?> {
+internal fun requestWeather(lat: Double, lon: Double): JSONObject {
+    val connection = URL("https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=7&timezone=auto&timeformat=unixtime").openConnection() as HttpsURLConnection
+    return try {
+        connection.connectTimeout = 8000; connection.readTimeout = 8000
+        connection.inputStream.bufferedReader().use { JSONObject(it.readText()) }
+    } finally { connection.disconnect() }
+}
+internal suspend fun loadWeather(context: Context, foreground: Boolean,
+    locate: suspend (Context, Boolean) -> Location? = ::currentLocation,
+    forecast: (Double, Double) -> JSONObject = ::requestWeather): Pair<Weather?, String?> {
     val prefs = context.getSharedPreferences("day", Context.MODE_PRIVATE)
     if (!prefs.getBoolean("weather_enabled", false) || !context.hasLocation()) return null to "Povoľ polohu v appke Deň"
     val cached = cachedWeather(context)
-    val location = currentLocation(context, foreground)
-        ?: return cached to if (!foreground && !context.granted(Manifest.permission.ACCESS_BACKGROUND_LOCATION)) "Na presun mesta povoľ polohu vždy" else "Poloha nie je dostupná · obnov"
-    val lat = roundedCoordinate(location.latitude); val lon = roundedCoordinate(location.longitude)
+    val location = locate(context, foreground)
+    // Background GPS can be unavailable indoors or without the "always" permission.
+    // Keep fetching fresh weather for the last known place instead of freezing the forecast.
+    val lat = location?.let { roundedCoordinate(it.latitude) } ?: cached?.latitude
+        ?: return cached to "Poloha nie je dostupná · otvor appku a obnov"
+    val lon = location?.let { roundedCoordinate(it.longitude) } ?: cached!!.longitude
     return try {
-        val connection = URL("https://api.open-meteo.com/v1/forecast?latitude=$lat&longitude=$lon&current=temperature_2m,weather_code,is_day&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=7&timezone=auto&timeformat=unixtime").openConnection() as HttpsURLConnection
-        val data = try {
-            connection.connectTimeout = 8000; connection.readTimeout = 8000
-            connection.inputStream.bufferedReader().use { JSONObject(it.readText()) }
-        } finally { connection.disconnect() }
+        val data = forecast(lat, lon)
         val current = data.getJSONObject("current"); val daily = data.getJSONObject("daily")
         val timezone = data.getString("timezone")
-        val forecast = parseDailyForecast(daily, timezone)
+        val days = parseDailyForecast(daily, timezone)
         val city = if (cached?.latitude == lat && cached.longitude == lon && cached.city != "Aktuálna poloha") cached.city else runCatching { cityName(context, lat, lon) }.getOrDefault("Aktuálna poloha")
         val weather = Weather(current.getDouble("temperature_2m"), current.getInt("weather_code"), daily.getJSONArray("temperature_2m_min").getDouble(0),
-            daily.getJSONArray("temperature_2m_max").getDouble(0), city, current.getLong("time") * 1000, System.currentTimeMillis(), lat, lon, current.getInt("is_day") == 1, forecast, timezone)
+            daily.getJSONArray("temperature_2m_max").getDouble(0), city, current.getLong("time") * 1000, System.currentTimeMillis(), lat, lon, current.getInt("is_day") == 1, days, timezone)
         require(weather.temperature.isFinite() && weather.temperature in -100.0..70.0)
         prefs.edit().putString("weather", weatherJson(weather)).apply()
-        weather to null
-    } catch (_: Exception) { cached to if (cached == null) "Počasie nedostupné · skontroluj internet" else "Počasie sa neobnovilo · uložené údaje" }
+        weather to if (location == null) "Počasie pre poslednú známu polohu" else null
+    } catch (cancelled: CancellationException) { throw cancelled }
+    catch (_: Exception) { cached to if (cached == null) "Počasie nedostupné · skontroluj internet" else "Počasie sa neobnovilo · uložené údaje" }
 }

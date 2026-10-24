@@ -71,6 +71,8 @@ Pri oddelení projektu zostali `applicationId`, namespace, triedy komponentov a 
 
 Widget má cieľový rozmer 4 × 4 bunky a povoľuje zmenšenie od 250 × 250 dp. Podľa dostupnej výšky používa plné (od 346 dp), kompaktné (od 320 dp) alebo malé rozloženie. Počet buniek a skutočnú výšku určuje launcher. Existujúci widget môže po aktualizácii ponechať pôvodne rezervovaný priestor: podrž ho, vyber Prispôsobiť veľkosť a potiahni spodnú hranu nahor. Na Xiaomi 13 Lite bolo overené uvoľnenie jedného riadka pri zachovaní plného rozloženia.
 
+V hornom paneli je samostatné tlačidlo kalendára s fajkou na opätovné načítanie vlastných udalostí. Po kontrole zobrazí potvrdenie alebo chybu oprávnenia/čítania. Načítava kalendáre už synchronizované v mobile; nevynucuje cloudovú synchronizáciu Google alebo Outlook účtu. Vedľajšia kruhová šípka obnovuje aj počasie a ozubené koliesko otvára nastavenia.
+
 ## Súkromie a oprávnenia
 
 - Kalendáre sa čítajú z Android Calendar Provider. Tlačidlo + odovzdá vytvorenie udalosti natívnej aplikácii; samo nič nezapisuje.
@@ -84,13 +86,15 @@ Repozitár obsahuje zdroje, testovacie ukážky a verejný dataset menín. Prev�
 
 ## Obnova a obmedzenia
 
-Počasie sa obnovuje približne každých 30 minút; Android môže úlohu odložiť. Ikona obnovy vyžiada načítanie. Počasie je modelový odhad Open-Meteo s časom modelových údajov. Chýbajúce dni predpovede zobrazia pomlčky.
+Počasie sa obnovuje približne každých 30 minút cez vlastnú trvalú úlohu JobScheduler so sieťovou podmienkou. Plánovanie nezávisí od periodických broadcastov launchera a obnoví sa po reštarte aj aktualizácii aplikácie. Widget a zapnutý prehľad na zamknutej obrazovke používajú spoločnú úlohu; opakované prekreslenie neposúva jej termín. Android môže beh odložiť pri úspore energie alebo bez siete. Pri rozsvietení displeja sa zastarané údaje obnovia aj v bežiacom procese. Ikona obnovy vyžiada načítanie.
+
+Ak nová poloha nie je dostupná, počasie sa načíta pre posledné známe miesto. Povolenie polohy „vždy“ je potrebné na automatickú zmenu mesta na pozadí; samotná obnova počasia pre už uložené miesto nevyžaduje nový GPS fix. Pri vypnutí počasia alebo odobratí povolenia polohy sa uložené súradnice nepoužijú na požiadavku. Počasie je modelový odhad Open-Meteo s časom modelových údajov. Chýbajúce dni predpovede zobrazia pomlčky.
 
 Kalendáre zahŕňajú opakovania cez systémové `Instances`, vynechajú zrušené a odmietnuté udalosti. Možnosti natívneho formulára, dostupné účty a vzhľad denného zobrazenia riadi Google Kalendár alebo Outlook. Ak cieľová aplikácia chýba, zobrazí sa správa; Outlook sa nenahrádza Google Kalendárom. Detail udalosti na ľavej strane naďalej používa Android provider ID cez Google Kalendár, ktorý dokáže zobraziť aj exportované Outlook udalosti.
 
 Na Xiaomi sa najbližšie budenie číta aj z `next_alarm_clock_formatted`: štandardné Android rozhranie môže na tomto zariadení zameniť polnočnú údržbu kalendára za budík. Po ukončení procesu sa údaj obnoví pri ďalšej obnove widgetu.
 
-Lockscreen prehľad je oznámenie, nie Always-on displej ani náhrada zamknutej obrazovky. Zbalený obsah ukazuje počasie, budík a oba kalendáre; rozšírený obsah aj časy a meniny. Spôsob rozbalenia určuje systém. Bez widgetu na ploche používa zapnutý prehľad samostatnú 30-minútovú úlohu.
+Lockscreen prehľad je oznámenie, nie Always-on displej ani náhrada zamknutej obrazovky. Zbalený obsah ukazuje počasie, budík a oba kalendáre; rozšírený obsah aj časy a meniny. Spôsob rozbalenia určuje systém. Rovnaká 30-minútová úloha funguje aj so zapnutým prehľadom bez widgetu na ploche.
 
 ## Testy
 

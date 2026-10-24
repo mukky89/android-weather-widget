@@ -1,9 +1,6 @@
 package sk.marek.den
 
 import android.app.*
-import android.app.job.JobInfo
-import android.app.job.JobScheduler
-import android.appwidget.AppWidgetManager
 import android.content.*
 import android.provider.AlarmClock
 import java.time.Instant
@@ -82,11 +79,6 @@ object LockscreenOverview {
         try { manager.notify(ID, build(context, state)) } catch (_: SecurityException) { /* Permission can be revoked between checks. */ }
     }
     fun schedule(context: Context) {
-        val jobs = context.getSystemService(JobScheduler::class.java)
-        val widgets = AppWidgetManager.getInstance(context).getAppWidgetIds(ComponentName(context, DayWidget::class.java))
-        if (!enabled(context) || widgets.isNotEmpty()) { jobs.cancel(JOB); return }
-        // The widget already refreshes every 30 minutes. Only add a job when the overview runs by itself.
-        if (jobs.getPendingJob(JOB) == null) jobs.schedule(JobInfo.Builder(JOB, ComponentName(context, DayJob::class.java))
-            .setPeriodic(30 * 60000L).setPersisted(true).build())
+        ensureDaySchedule(context)
     }
 }

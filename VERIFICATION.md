@@ -1,5 +1,21 @@
 # Overenie
 
+## 0.16.0 — kontrola udalostí priamo vo widgete
+
+- Vo všetkých troch veľkostiach widgetu je v hornom paneli samostatná ikona kalendára s fajkou. Má vlastný broadcast a načíta kalendárové udalosti bez čakania na GPS alebo sieťovú požiadavku počasia. Po dokončení zobrazí potvrdenie alebo chybu čítania/povolenia. Čas poslednej kontroly je súčasťou popisu pre prístupnosť.
+- Tlačidlo číta Calendar Provider v mobile; nepredstiera vynútenie cloudovej synchronizácie Google/Outlook. Existujúca obnova počasia aj nastavenia zostávajú samostatne dostupné.
+- Zostavenie aplikácie a testovacieho APK, 29 unit testov a Android lint prešli. Aktualizácia 0.16.0/code 16 sa nainštalovala na pripojený Xiaomi so zachovaním údajov.
+- Na emulátore s Androidom 14 prešlo 7 cielených Android testov: päť testov automatickej obnovy (posledná známa poloha, chýbajúca prvotná poloha, vypnuté počasie/odobraté oprávnenie, chyba siete/zrušenie, trvalé plánovanie bez resetu) a dva testy nového tlačidla a rozloženia. Render sa overil pri 250 × 250, 350 × 250, 250 × 320, 350 × 320 a 350 × 360 dp; tlačidlo má vlastnú klikaciu oblasť vedľa obnovy počasia a nastavení.
+
+## 0.15.0 — automatická obnova počasia
+
+- Widget už nečaká na 30-minútové broadcasty launchera. Spoločná sieťová úloha 811 je periodická, trvalá a obsluhuje widget aj samostatný lockscreen prehľad. Ručná obnova používa úlohu 812. Starý samostatný časovač 814 sa odstráni; prekreslenie existujúcu pravidelnú úlohu nepreplánuje.
+- Pri chýbajúcom GPS fixe alebo nepovolenej polohe na pozadí sa nové počasie stiahne pre posledné známe miesto. Bez prvotnej polohy, pri vypnutom počasí alebo odobratom povolení sa požiadavka na uložené miesto nevykoná. Chyba siete zachová cache; zrušenie úlohy sa neskrýva ako chyba siete.
+- Zostavenie aplikácie aj testovacieho APK, všetkých 29 unit testov a Android lint prešli. Lint má existujúce upozornenia, bez chýb.
+- Verzia 0.15.0/code 15 bola nainštalovaná ako aktualizácia na Xiaomi 13 Lite s Androidom 15; zhodný podpis zachoval nastavenia aj existujúci widget. Systém potvrdil periodickú 30-minútovú úlohu s príznakom PERSISTED a požiadavkou na sieť.
+- Po návrate na plochu a ukončení procesu cez `am kill` bola systémová úloha spustená cez `cmd jobscheduler run -f`. Bez otvorenia aktivity znovu vytvorila proces a uložila novšie počasie; pravidelná úloha zostala naplánovaná. Ide o vynútený test systémovej cesty, nie o dlhodobý test prirodzených 30-minútových behov, reštartu alebo Doze.
+- Inštaláciu pomocného testovacieho APK telefón odmietol s `INSTALL_FAILED_USER_RESTRICTED`. Prevádzkové snímky, cache, osobné údaje a podpisové kľúče zostávajú mimo repozitára.
+
 ## 0.14.0 — zmenšenie rezervovaného priestoru
 
 - Predvolený rozmer je 4 × 4 bunky, minHeight aj minResizeHeight sú 250 dp. Launcher pôvodne rezervoval päť riadkov aj pri nižšom obsahu. Samotný limit 320 dp na tomto Xiaomi stále neumožnil zmenšenie; finálny limit 250 dp ho umožnil.

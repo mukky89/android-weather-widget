@@ -12,6 +12,8 @@ import android.provider.CalendarContract
 import android.provider.AlarmClock
 import android.widget.RemoteViews
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -20,6 +22,21 @@ import java.util.Locale
 class DayWidget : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
+        if (intent.action == REFRESH_CALENDARS) {
+            val pending = goAsync()
+            val app = context.applicationContext as DayApp
+            app.scope.launch {
+                try {
+                    app.startupRefresh?.join()
+                    app.refreshAgenda()
+                    withContext(Dispatchers.Main) {
+                        android.widget.Toast.makeText(context, app.state.value.agenda.error ?: "Kalendárové udalosti obnovené",
+                            android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                } finally { pending.finish() }
+            }
+            return
+        }
         if (intent.action == PAGE) {
             val widgetId = intent.getIntExtra("widget_id", AppWidgetManager.INVALID_APPWIDGET_ID)
             val source = CalendarSource.entries.firstOrNull { it.name == intent.getStringExtra("source") } ?: return
@@ -46,12 +63,11 @@ class DayWidget : AppWidgetProvider() {
         }
     }
     override fun onDisabled(context: Context) {
-        val jobs = context.getSystemService(android.app.job.JobScheduler::class.java)
-        jobs.cancel(811); jobs.cancel(812)
-        LockscreenOverview.schedule(context)
+        ensureDaySchedule(context)
     }
     companion object {
         const val REFRESH = "sk.marek.den.REFRESH"
+        const val REFRESH_CALENDARS = "sk.marek.den.REFRESH_CALENDARS"
         const val PAGE = "sk.marek.den.CALENDAR_PAGE"
         fun requestPin(context: Context): Boolean {
             val manager = AppWidgetManager.getInstance(context)
@@ -88,6 +104,14 @@ class DayWidget : AppWidgetProvider() {
             setOnClickPendingIntent(R.id.day_clock, alarmTarget ?: open)
             setOnClickPendingIntent(R.id.day_refresh, PendingIntent.getBroadcast(context, 0,
                 Intent(context, DayWidget::class.java).setAction(REFRESH).addFlags(Intent.FLAG_RECEIVER_FOREGROUND), PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+            setOnClickPendingIntent(R.id.day_calendar_refresh, PendingIntent.getBroadcast(context, 0,
+                Intent(context, DayWidget::class.java).setAction(REFRESH_CALENDARS).addFlags(Intent.FLAG_RECEIVER_FOREGROUND),
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE))
+            val checked = state.agendaCheckedAt.takeIf { it > 0 }?.let {
+                Instant.ofEpochMilli(it).atZone(ZoneId.systemDefault()).format(DateTimeFormatter.ofPattern("HH:mm"))
+            }
+            setContentDescription(R.id.day_calendar_refresh, "Obnoviť moje kalendárové udalosti" +
+                (state.agenda.error?.let { ". $it" } ?: checked?.let { ". Posledná kontrola $it" }.orEmpty()))
             setTextViewText(R.id.day_names, nameday(context))
             setContentDescription(R.id.day_names, "Meniny dnes: ${nameday(context)}")
             val weather = state.weather.takeIf { context.hasLocation() }

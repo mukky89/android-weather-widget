@@ -25,7 +25,7 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 data class DayState(val agenda: Agenda = Agenda(error = "Načítavam kalendáre…"), val weather: Weather? = null,
-    val weatherError: String? = null, val loading: Boolean = false)
+    val weatherError: String? = null, val loading: Boolean = false, val agendaCheckedAt: Long = 0)
 class DayApp : Application() {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     var startupRefresh: Job? = null
@@ -41,7 +41,11 @@ class DayApp : Application() {
         ContextCompat.registerReceiver(this, object : BroadcastReceiver() {
             override fun onReceive(context: Context, intent: Intent) {
                 if (intent.action == AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED) DayWidget.updateAll(this@DayApp, state.value)
-                if (intent.action == Intent.ACTION_SCREEN_ON && LockscreenOverview.enabled(this@DayApp)) scope.launch { refreshAgenda() }
+                if (intent.action == Intent.ACTION_SCREEN_ON && dayUpdatesNeeded(this@DayApp)) scope.launch {
+                    val weather = state.value.weather ?: cachedWeather(this@DayApp)
+                    if (weather == null || System.currentTimeMillis() - weather.fetched >= DAY_REFRESH_INTERVAL) refresh()
+                    else refreshAgenda()
+                }
             }
         }, IntentFilter(AlarmManager.ACTION_NEXT_ALARM_CLOCK_CHANGED).apply { addAction(Intent.ACTION_SCREEN_ON) }, ContextCompat.RECEIVER_EXPORTED)
         try {
@@ -50,6 +54,7 @@ class DayApp : Application() {
                     override fun onChange(selfChange: Boolean) { DayWidget.updateAll(this@DayApp, state.value) }
                 })
         } catch (_: SecurityException) { /* Periodic widget updates still refresh the alarm. */ }
+        ensureDaySchedule(this)
         startupRefresh = scope.launch { refreshAgenda() }
     }
     fun observeCalendars() {
@@ -60,7 +65,8 @@ class DayApp : Application() {
     suspend fun refreshAgenda() {
         val agenda = withContext(Dispatchers.IO) { readAgenda(this@DayApp) }
         CalendarReminders.refresh(this@DayApp)
-        state.value = state.value.copy(agenda = agenda, weather = if (hasLocation()) state.value.weather ?: cachedWeather(this) else null)
+        state.value = state.value.copy(agenda = agenda, agendaCheckedAt = System.currentTimeMillis(),
+            weather = if (hasLocation()) state.value.weather ?: cachedWeather(this) else null)
         DayWidget.updateAll(this, state.value)
         observeCalendars()
     }
@@ -79,13 +85,34 @@ fun nameday(context: Context, date: LocalDate = LocalDate.now()): String {
     val names = data.optJSONArray(date.format(DateTimeFormatter.ofPattern("MM-dd"))) ?: return "Dnes bez menín"
     return (0 until names.length()).joinToString(", ") { names.getString(it) }
 }
-fun scheduleDay(context: Context) {
-    if (android.appwidget.AppWidgetManager.getInstance(context).getAppWidgetIds(ComponentName(context, DayWidget::class.java)).isEmpty() && !LockscreenOverview.enabled(context)) return
+const val DAY_REFRESH_INTERVAL = 30 * 60000L
+const val DAY_PERIODIC_JOB = 811
+const val DAY_IMMEDIATE_JOB = 812
+fun dayUpdatesNeeded(context: Context) = android.appwidget.AppWidgetManager.getInstance(context)
+    .getAppWidgetIds(ComponentName(context, DayWidget::class.java)).isNotEmpty() || LockscreenOverview.enabled(context)
+
+fun ensureDaySchedule(context: Context) {
     val scheduler = context.getSystemService(JobScheduler::class.java)
-    // AppWidgetManager owns the 30-minute cadence; this job performs each requested fetch.
-    scheduler.cancel(811)
-    if (scheduler.getPendingJob(812) != null) return
-    scheduler.schedule(JobInfo.Builder(812, ComponentName(context, DayJob::class.java)).setMinimumLatency(0).build())
+    scheduler.cancel(LockscreenOverview.JOB) // Replace the old overview-only timer with one shared schedule.
+    if (!dayUpdatesNeeded(context)) {
+        scheduler.cancel(DAY_PERIODIC_JOB)
+        scheduler.cancel(DAY_IMMEDIATE_JOB)
+        return
+    }
+    val pending = scheduler.getPendingJob(DAY_PERIODIC_JOB)
+    // Do not reset the next run every time the calendar or widget is redrawn.
+    if (pending?.isPeriodic == true && pending.isPersisted && pending.intervalMillis == DAY_REFRESH_INTERVAL &&
+        pending.networkType == JobInfo.NETWORK_TYPE_ANY) return
+    scheduler.schedule(JobInfo.Builder(DAY_PERIODIC_JOB, ComponentName(context, DayJob::class.java))
+        .setPeriodic(DAY_REFRESH_INTERVAL).setPersisted(true).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY).build())
+}
+fun scheduleDay(context: Context) {
+    ensureDaySchedule(context)
+    if (!dayUpdatesNeeded(context)) return
+    val scheduler = context.getSystemService(JobScheduler::class.java)
+    if (scheduler.getPendingJob(DAY_IMMEDIATE_JOB) != null) return
+    scheduler.schedule(JobInfo.Builder(DAY_IMMEDIATE_JOB, ComponentName(context, DayJob::class.java))
+        .setMinimumLatency(0).setRequiredNetworkType(JobInfo.NETWORK_TYPE_ANY).build())
 }
 class DayJob : JobService() {
     private val jobs = mutableMapOf<Int, Job>()
